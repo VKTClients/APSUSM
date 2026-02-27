@@ -2,7 +2,8 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowDownRight, ArrowRight, Shield, CreditCard,
-  Mail, Stethoscope, QrCode, BadgeCheck
+  Mail, Stethoscope, QrCode, BadgeCheck,
+  Heart, Handshake, Megaphone, Award
 } from 'lucide-react'
 import { useTranslation } from '../contexts/TranslationContext'
 
@@ -205,6 +206,45 @@ export default function HomePage() {
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── MISSION ──────────────────────────────────────────────── */}
+      <section className="py-24 px-6 bg-white/50">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-16 items-start">
+            {/* Left — mission statement */}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">{t('mission_label')}</p>
+              <h2 className="text-4xl font-bold text-slate-900 tracking-tight mb-6">
+                {t('mission_title')}
+              </h2>
+              <p className="text-slate-500 leading-relaxed mb-6">
+                {t('mission_body')}
+              </p>
+              <p className="text-slate-600 font-medium text-sm leading-relaxed border-l-4 border-brand-blue pl-4">
+                {t('mission_closing')}
+              </p>
+            </div>
+
+            {/* Right — four pillars */}
+            <div className="grid sm:grid-cols-2 gap-5">
+              {[
+                { icon: Megaphone, titleKey: 'pillar_advocacy_title', descKey: 'pillar_advocacy_desc', color: 'bg-red-50 text-red-600' },
+                { icon: Award, titleKey: 'pillar_appreciation_title', descKey: 'pillar_appreciation_desc', color: 'bg-blue-50 text-blue-600' },
+                { icon: Handshake, titleKey: 'pillar_representation_title', descKey: 'pillar_representation_desc', color: 'bg-emerald-50 text-emerald-600' },
+                { icon: Heart, titleKey: 'pillar_solidarity_title', descKey: 'pillar_solidarity_desc', color: 'bg-purple-50 text-purple-600' },
+              ].map((p) => (
+                <div key={p.titleKey} className="bg-[#f2f0eb] rounded-2xl p-6 border border-slate-200/60">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${p.color}`}>
+                    <p.icon className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-2">{t(p.titleKey)}</h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">{t(p.descKey)}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

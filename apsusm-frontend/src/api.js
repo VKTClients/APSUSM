@@ -1,5 +1,10 @@
 import axios from 'axios';
-import { shouldUseMock, mockRegisterMember, mockPaystackPayment, mockVerifyPayment, mockGetMemberStatus, mockVerifyMember } from './mockPaystack';
+import {
+  shouldUseMock, mockRegisterMember, mockPaystackPayment,
+  mockVerifyPayment, mockGetMemberStatus, mockVerifyMember,
+  getMockCardUrl as _getMockCardUrl,
+  getMockCardBackUrl as _getMockCardBackUrl,
+} from './mockPaystack';
 
 const api = axios.create({
   baseURL: '/api',
@@ -27,7 +32,6 @@ export async function registerMember(formData) {
 // Initialize Payment
 export async function initializePayment(memberId) {
   if (shouldUseMock()) {
-    // Use mock for development
     return mockPaystackPayment(memberId);
   }
   try {
@@ -42,7 +46,7 @@ export async function initializePayment(memberId) {
 // Verify Payment (after Paystack redirect)
 export async function verifyPayment(reference) {
   if (shouldUseMock()) {
-    const mockResult = mockVerifyPayment(reference);
+    const mockResult = await mockVerifyPayment(reference);
     if (mockResult) return mockResult;
   }
   try {
@@ -50,7 +54,7 @@ export async function verifyPayment(reference) {
     return response.data;
   } catch (error) {
     console.warn('Backend not available, falling back to mock:', error);
-    const mockResult = mockVerifyPayment(reference);
+    const mockResult = await mockVerifyPayment(reference);
     if (mockResult) return mockResult;
     throw error;
   }
@@ -83,6 +87,10 @@ export async function verifyMember(memberId) {
     return mockVerifyMember(memberId);
   }
 }
+
+// Get mock-generated card URLs (for dev mode)
+export { _getMockCardUrl as getMockCardUrl };
+export { _getMockCardBackUrl as getMockCardBackUrl };
 
 // Admin API (requires Basic Auth)
 const adminApi = axios.create({

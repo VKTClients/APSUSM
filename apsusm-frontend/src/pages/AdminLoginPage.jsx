@@ -2,9 +2,12 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Shield, Lock, Loader2 } from 'lucide-react'
 import { setAdminAuth, getAdminDashboard } from '../api'
+import { useTranslation } from '../contexts/TranslationContext'
+import LanguageToggle from '../components/LanguageToggle'
 
 export default function AdminLoginPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -21,7 +24,7 @@ export default function AdminLoginPage() {
       localStorage.setItem('admin_auth', btoa(`${username}:${password}`))
       navigate('/admin/dashboard')
     } catch (err) {
-      setError('Invalid credentials')
+      setError(t('admin_invalid'))
     } finally {
       setLoading(false)
     }
@@ -34,8 +37,8 @@ export default function AdminLoginPage() {
           <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center mx-auto mb-4">
             <Shield className="w-7 h-7 text-white" />
           </div>
-          <h1 className="text-2xl font-medium text-slate-900">Admin Portal</h1>
-          <p className="text-sm text-slate-500 mt-1">APSUSM Membership Management</p>
+          <h1 className="text-2xl font-medium text-slate-900">{t('admin_title')}</h1>
+          <p className="text-sm text-slate-500 mt-1">{t('admin_subtitle')}</p>
         </div>
 
         <form onSubmit={handleLogin} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-5">
@@ -46,7 +49,7 @@ export default function AdminLoginPage() {
           )}
 
           <div className="space-y-2">
-            <label className="text-xs font-medium text-slate-700">Username</label>
+            <label className="text-xs font-medium text-slate-700">{t('admin_username')}</label>
             <input
               type="text"
               value={username}
@@ -58,7 +61,7 @@ export default function AdminLoginPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-medium text-slate-700">Password</label>
+            <label className="text-xs font-medium text-slate-700">{t('admin_password')}</label>
             <input
               type="password"
               value={password}
@@ -79,10 +82,14 @@ export default function AdminLoginPage() {
             ) : (
               <>
                 <Lock className="w-4 h-4" />
-                Sign In
+                {t('admin_sign_in')}
               </>
             )}
           </button>
+
+          <div className="flex justify-center pt-2">
+            <LanguageToggle />
+          </div>
         </form>
       </div>
     </div>

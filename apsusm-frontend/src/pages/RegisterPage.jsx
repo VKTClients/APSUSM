@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Upload, Loader2, CheckCircle, AlertCircle, Camera, Shield, CreditCard, ArrowRight } from 'lucide-react'
+import { Loader2, CheckCircle, AlertCircle, Camera, Shield, CreditCard, ArrowRight, FileCheck } from 'lucide-react'
 import { registerMember, initializePayment } from '../api'
+import { useTranslation } from '../contexts/TranslationContext'
 
 const PROVINCES = [
   'Maputo Cidade', 'Maputo Província', 'Gaza', 'Inhambane',
@@ -9,16 +10,9 @@ const PROVINCES = [
   'Nampula', 'Cabo Delgado', 'Niassa'
 ]
 
-const SPECIALIZATIONS = [
-  'General Medicine', 'Cardiology', 'Neurology', 'Pediatrics',
-  'Surgery', 'Obstetrics & Gynecology', 'Orthopedics', 'Dermatology',
-  'Ophthalmology', 'Psychiatry', 'Radiology', 'Anesthesiology',
-  'Pathology', 'Emergency Medicine', 'Internal Medicine', 'Nursing',
-  'Pharmacy', 'Dentistry', 'Public Health', 'Other'
-]
-
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [step, setStep] = useState(1) // 1=form, 2=review, 3=payment
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -26,13 +20,16 @@ export default function RegisterPage() {
   const [registeredId, setRegisteredId] = useState(null)
 
   const [form, setForm] = useState({
-    firstName: '', lastName: '', email: '', phone: '',
-    licenseNumber: '', institution: '', specialization: '',
-    province: '', photo: null
+    fullName: '', email: '', phone: '',
+    institution: '', position: '',
+    province: '', photo: null, termsAccepted: false
   })
 
+  const inputClass = "w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-400 transition-all placeholder:text-slate-400"
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
+    const { name, value, type, checked } = e.target
+    setForm({ ...form, [name]: type === 'checkbox' ? checked : value })
     setError('')
   }
 
@@ -41,11 +38,11 @@ export default function RegisterPage() {
     if (!file) return
 
     if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
-      setError('Only JPEG and PNG images are allowed')
+      setError(t('reg_error_photo_type'))
       return
     }
     if (file.size > 5 * 1024 * 1024) {
-      setError('File size must be under 5MB')
+      setError(t('reg_error_photo_size'))
       return
     }
 
@@ -55,13 +52,15 @@ export default function RegisterPage() {
   }
 
   const validateForm = () => {
-    if (!form.firstName.trim()) return 'First name is required'
-    if (!form.lastName.trim()) return 'Last name is required'
-    if (!form.email.trim()) return 'Email is required'
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return 'Invalid email format'
-    if (!form.licenseNumber.trim()) return 'License number is required'
-    if (!form.province) return 'Province is required'
-    if (!form.photo) return 'Portrait photo is required'
+    if (!form.fullName.trim()) return t('reg_error_name')
+    if (!form.phone.trim()) return t('reg_error_phone')
+    if (!form.email.trim()) return t('reg_error_email')
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return t('reg_error_email_format')
+    if (!form.institution.trim()) return t('reg_error_institution')
+    if (!form.position.trim()) return t('reg_error_position')
+    if (!form.province) return t('reg_error_province')
+    if (!form.photo) return t('reg_error_photo')
+    if (!form.termsAccepted) return t('reg_error_terms')
     return null
   }
 
@@ -77,13 +76,11 @@ export default function RegisterPage() {
 
     try {
       const formData = new FormData()
-      formData.append('firstName', form.firstName)
-      formData.append('lastName', form.lastName)
+      formData.append('fullName', form.fullName)
       formData.append('email', form.email)
       formData.append('phone', form.phone)
-      formData.append('licenseNumber', form.licenseNumber)
       formData.append('institution', form.institution)
-      formData.append('specialization', form.specialization)
+      formData.append('position', form.position)
       formData.append('province', form.province)
       formData.append('photo', form.photo)
 
@@ -96,16 +93,15 @@ export default function RegisterPage() {
         // Initialize payment
         const payResult = await initializePayment(result.memberId)
         if (payResult.success && payResult.authorizationUrl) {
-          // Redirect to Paystack
           window.location.href = payResult.authorizationUrl
         } else {
-          setError(payResult.message || 'Payment initialization failed')
+          setError(payResult.message || t('reg_error_payment'))
         }
       } else {
-        setError(result.message || 'Registration failed')
+        setError(result.message || t('reg_error_failed'))
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.')
+      setError(err.response?.data?.message || t('reg_error_failed'))
     } finally {
       setLoading(false)
     }
@@ -123,13 +119,13 @@ export default function RegisterPage() {
         <div className="max-w-4xl mx-auto px-6 text-center py-12 animate-fade-in">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-xs font-medium text-slate-500 mb-6 tracking-wide">
             <span className="w-1.5 h-1.5 rounded-full bg-brand-blue animate-pulse" />
-            Membership Registration
+            {t('reg_badge')}
           </div>
           <h1 className="text-4xl md:text-5xl font-medium text-slate-900 tracking-tight leading-tight mb-4">
-            Join the Standard.
+            {t('reg_headline')}
           </h1>
           <p className="text-lg text-slate-500 font-light max-w-xl mx-auto">
-            Complete your registration to become a verified APSUSM member and receive your digital credential.
+            {t('reg_subheadline')}
           </p>
         </div>
       </div>
@@ -138,9 +134,9 @@ export default function RegisterPage() {
       <div className="max-w-xl mx-auto px-6 mb-10">
         <div className="flex items-center justify-center gap-0">
           {[
-            { num: 1, label: 'Details' },
-            { num: 2, label: 'Review' },
-            { num: 3, label: 'Payment' }
+            { num: 1, label: t('reg_step_details') },
+            { num: 2, label: t('reg_step_review') },
+            { num: 3, label: t('reg_step_payment') }
           ].map((s, i) => (
             <React.Fragment key={s.num}>
               <div className="flex flex-col items-center gap-2">
@@ -174,86 +170,71 @@ export default function RegisterPage() {
 
         {step === 1 && (
           <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-slate-700">First Name *</label>
-                <input
-                  name="firstName" value={form.firstName} onChange={handleChange}
-                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-400 transition-all placeholder:text-slate-400"
-                  placeholder="Jane"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-slate-700">Last Name *</label>
-                <input
-                  name="lastName" value={form.lastName} onChange={handleChange}
-                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-400 transition-all placeholder:text-slate-400"
-                  placeholder="Doe"
-                />
-              </div>
-            </div>
-
+            {/* Full Name */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700">Professional Email *</label>
+              <label className="text-xs font-medium text-slate-700">{t('reg_full_name')} *</label>
               <input
-                name="email" type="email" value={form.email} onChange={handleChange}
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-400 transition-all placeholder:text-slate-400"
-                placeholder="doctor@clinic.com"
+                name="fullName" value={form.fullName} onChange={handleChange}
+                className={inputClass}
+                placeholder={t('reg_full_name_placeholder')}
               />
             </div>
 
+            {/* Phone */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700">Phone Number</label>
+              <label className="text-xs font-medium text-slate-700">{t('reg_phone')} *</label>
               <input
                 name="phone" value={form.phone} onChange={handleChange}
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-400 transition-all placeholder:text-slate-400"
+                className={inputClass}
                 placeholder="+258 84 000 0000"
               />
             </div>
 
+            {/* Email */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700">Medical License Number *</label>
+              <label className="text-xs font-medium text-slate-700">{t('reg_email')} *</label>
               <input
-                name="licenseNumber" value={form.licenseNumber} onChange={handleChange}
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-400 transition-all placeholder:text-slate-400 font-mono tracking-wide"
-                placeholder="MZ-0000-00"
+                name="email" type="email" value={form.email} onChange={handleChange}
+                className={inputClass}
+                placeholder={t('reg_email_placeholder')}
               />
             </div>
 
+            {/* Institution */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700">Institution</label>
+              <label className="text-xs font-medium text-slate-700">{t('reg_institution')} *</label>
               <input
                 name="institution" value={form.institution} onChange={handleChange}
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-400 transition-all placeholder:text-slate-400"
-                placeholder="Hospital Central de Maputo"
+                className={inputClass}
+                placeholder={t('reg_institution_placeholder')}
               />
             </div>
 
+            {/* Position / Occupation */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700">Specialization</label>
-              <select
-                name="specialization" value={form.specialization} onChange={handleChange}
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 appearance-none focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-400 transition-all cursor-pointer"
-              >
-                <option value="">Select specialization...</option>
-                {SPECIALIZATIONS.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <label className="text-xs font-medium text-slate-700">{t('reg_position')} *</label>
+              <input
+                name="position" value={form.position} onChange={handleChange}
+                className={inputClass}
+                placeholder={t('reg_position_placeholder')}
+              />
             </div>
 
+            {/* Province */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700">Province of Practice *</label>
+              <label className="text-xs font-medium text-slate-700">{t('reg_province')} *</label>
               <select
                 name="province" value={form.province} onChange={handleChange}
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 appearance-none focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-400 transition-all cursor-pointer"
+                className={`${inputClass} text-slate-600 appearance-none cursor-pointer`}
               >
-                <option value="">Select province...</option>
+                <option value="">{t('reg_province_placeholder')}</option>
                 {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
 
             {/* Photo Upload */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700">Portrait Photo * (JPEG/PNG, max 5MB)</label>
+              <label className="text-xs font-medium text-slate-700">{t('reg_photo')} *</label>
               <div className="flex items-center gap-4">
                 <label className="flex-1 cursor-pointer">
                   <div className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${
@@ -265,14 +246,14 @@ export default function RegisterPage() {
                         <div className="text-left">
                           <p className="text-sm font-medium text-slate-700">{form.photo?.name}</p>
                           <p className="text-xs text-slate-500 mt-1">{(form.photo?.size / 1024 / 1024).toFixed(2)} MB</p>
-                          <p className="text-xs text-brand-blue mt-1">Click to change</p>
+                          <p className="text-xs text-brand-blue mt-1">{t('reg_photo_change')}</p>
                         </div>
                       </div>
                     ) : (
                       <>
                         <Camera className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                        <p className="text-sm text-slate-500">Click to upload your portrait photo</p>
-                        <p className="text-xs text-slate-400 mt-1">High-quality ID-style photo from shoulders up</p>
+                        <p className="text-sm text-slate-500">{t('reg_photo_upload')}</p>
+                        <p className="text-xs text-slate-400 mt-1">{t('reg_photo_hint')}</p>
                       </>
                     )}
                   </div>
@@ -281,11 +262,26 @@ export default function RegisterPage() {
               </div>
             </div>
 
+            {/* Terms & Conditions */}
+            <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
+              <input
+                type="checkbox"
+                name="termsAccepted"
+                checked={form.termsAccepted}
+                onChange={handleChange}
+                className="mt-0.5 w-4 h-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20 cursor-pointer"
+              />
+              <label className="text-sm text-slate-600 leading-relaxed cursor-pointer" onClick={() => setForm({ ...form, termsAccepted: !form.termsAccepted })}>
+                <FileCheck className="w-4 h-4 inline-block mr-1 text-slate-400 -mt-0.5" />
+                {t('reg_terms_label')}
+              </label>
+            </div>
+
             <button
               onClick={handleReview}
               className="w-full bg-slate-900 text-white font-medium py-3.5 rounded-lg hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 active:scale-[0.99] flex items-center justify-center gap-2"
             >
-              Review Details
+              {t('reg_review_btn')}
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -293,25 +289,25 @@ export default function RegisterPage() {
 
         {step === 2 && (
           <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
-            <h3 className="text-lg font-semibold text-slate-900">Review Your Details</h3>
+            <h3 className="text-lg font-semibold text-slate-900">{t('reg_review_title')}</h3>
 
             <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
               {photoPreview && (
                 <img src={photoPreview} alt="Portrait" className="w-20 h-24 object-cover rounded-lg border border-slate-200" />
               )}
               <div>
-                <p className="text-lg font-semibold text-slate-900">{form.firstName} {form.lastName}</p>
-                <p className="text-sm text-slate-500">{form.specialization || 'Medical Professional'}</p>
+                <p className="text-lg font-semibold text-slate-900">{form.fullName}</p>
+                <p className="text-sm text-slate-500">{form.position}</p>
               </div>
             </div>
 
             <div className="space-y-3">
               {[
-                ['Email', form.email],
-                ['Phone', form.phone || 'N/A'],
-                ['License Number', form.licenseNumber],
-                ['Institution', form.institution || 'N/A'],
-                ['Province', form.province],
+                [t('reg_phone'), form.phone],
+                [t('reg_email'), form.email],
+                [t('reg_institution'), form.institution],
+                [t('reg_position'), form.position],
+                [t('reg_province'), form.province],
               ].map(([label, value]) => (
                 <div key={label} className="flex justify-between py-2 border-b border-slate-100">
                   <span className="text-sm text-slate-500">{label}</span>
@@ -323,11 +319,10 @@ export default function RegisterPage() {
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
               <div className="flex items-center gap-2 text-sm font-medium text-blue-800 mb-1">
                 <CreditCard className="w-4 h-4" />
-                Payment Required
+                {t('reg_payment_required')}
               </div>
               <p className="text-xs text-blue-600">
-                After confirming, you will be redirected to Paystack to complete your membership payment.
-                Your card will be generated after successful payment.
+                {t('reg_payment_desc')}
               </p>
             </div>
 
@@ -336,7 +331,7 @@ export default function RegisterPage() {
                 onClick={() => setStep(1)}
                 className="flex-1 py-3.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all"
               >
-                Edit Details
+                {t('reg_edit_btn')}
               </button>
               <button
                 onClick={handleSubmit}
@@ -346,11 +341,11 @@ export default function RegisterPage() {
                 {loading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Processing...
+                    {t('reg_processing')}
                   </>
                 ) : (
                   <>
-                    Confirm & Pay
+                    {t('reg_confirm_btn')}
                     <Shield className="w-4 h-4" />
                   </>
                 )}
@@ -362,8 +357,8 @@ export default function RegisterPage() {
         {step === 3 && (
           <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center space-y-4">
             <Loader2 className="w-12 h-12 text-brand-blue mx-auto animate-spin" />
-            <h3 className="text-lg font-semibold text-slate-900">Redirecting to Payment...</h3>
-            <p className="text-sm text-slate-500">You will be redirected to Paystack to complete your membership payment.</p>
+            <h3 className="text-lg font-semibold text-slate-900">{t('reg_redirecting')}</h3>
+            <p className="text-sm text-slate-500">{t('reg_redirecting_desc')}</p>
             {error && (
               <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
                 {error}
@@ -371,7 +366,7 @@ export default function RegisterPage() {
                   onClick={() => { setStep(2); setError('') }}
                   className="block mt-2 text-brand-blue underline text-xs"
                 >
-                  Go back and try again
+                  {t('reg_go_back')}
                 </button>
               </div>
             )}
@@ -381,7 +376,7 @@ export default function RegisterPage() {
         <div className="text-center mt-6">
           <p className="text-xs text-slate-400 flex items-center justify-center gap-1.5">
             <Shield className="w-3.5 h-3.5" />
-            Your data is end-to-end encrypted and strictly confidential.
+            {t('reg_privacy')}
           </p>
         </div>
       </div>

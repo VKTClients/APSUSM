@@ -1,19 +1,37 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { CheckCircle, Download, Mail, Shield, CreditCard } from 'lucide-react'
-import { getMemberStatus, getCardFrontUrl, getCardBackUrl } from '../api'
+import { getMemberStatus, getCardFrontUrl, getCardBackUrl, getMockCardUrl, getMockCardBackUrl } from '../api'
+import { shouldUseMock } from '../mockPaystack'
 
 export default function SuccessPage() {
   const { id } = useParams()
   const [member, setMember] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [mockCardUrl, setMockCardUrl] = useState(null)
+  const [mockCardBackUrl, setMockCardBackUrl] = useState(null)
 
   useEffect(() => {
+    // Check for mock-generated cards
+    if (shouldUseMock()) {
+      const url = getMockCardUrl()
+      if (url) setMockCardUrl(url)
+      const backUrl = getMockCardBackUrl()
+      if (backUrl) setMockCardBackUrl(backUrl)
+    }
+
     const fetchStatus = async () => {
       try {
         const result = await getMemberStatus(id)
         if (result.success) {
           setMember(result.member)
+          // Also check if member has card URLs from mock
+          if (result.member.cardUrl) {
+            setMockCardUrl(result.member.cardUrl)
+          }
+          if (result.member.cardBackUrl) {
+            setMockCardBackUrl(result.member.cardBackUrl)
+          }
         }
       } catch (err) {
         console.error('Failed to fetch member status', err)
@@ -22,9 +40,9 @@ export default function SuccessPage() {
       }
     }
     fetchStatus()
-    // Poll for card generation
-    const interval = setInterval(fetchStatus, 3000)
-    return () => clearInterval(interval)
+    // Poll for card generation (only needed for real backend)
+    const interval = shouldUseMock() ? null : setInterval(fetchStatus, 3000)
+    return () => { if (interval) clearInterval(interval) }
   }, [id])
 
   if (loading) {
@@ -69,8 +87,9 @@ export default function SuccessPage() {
                 {[
                   ['Full Name', member.fullName],
                   ['Email', member.email],
-                  ['License', member.licenseNumber],
-                  ['Specialization', member.specialization || 'N/A'],
+                  ['Phone', member.phone || 'N/A'],
+                  ['Institution', member.institution || 'N/A'],
+                  ['Position', member.position || 'N/A'],
                   ['Province', member.province],
                   ['Status', member.status],
                   ['Registered', member.registeredAt ? new Date(member.registeredAt).toLocaleDateString() : 'N/A'],
@@ -88,50 +107,90 @@ export default function SuccessPage() {
             </div>
 
             {/* Card Preview & Download */}
-            {member.hasCard && (
+            {(member.hasCard || mockCardUrl) ? (
               <div className="space-y-4 mb-8">
                 <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                   <CreditCard className="w-5 h-5" />
                   Your Membership Card
                 </h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Front</p>
-                    <img
-                      src={getCardFrontUrl(id)}
-                      alt="Card Front"
-                      className="w-full rounded-xl shadow-lg border border-slate-200"
-                    />
-                    <a
-                      href={getCardFrontUrl(id)}
-                      download={`${member.memberId}_front.png`}
-                      className="flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-all"
-                    >
-                      <Download className="w-4 h-4" />
-                      Download Front
-                    </a>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Back</p>
-                    <img
-                      src={getCardBackUrl(id)}
-                      alt="Card Back"
-                      className="w-full rounded-xl shadow-lg border border-slate-200"
-                    />
-                    <a
-                      href={getCardBackUrl(id)}
-                      download={`${member.memberId}_back.png`}
-                      className="flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-all"
-                    >
-                      <Download className="w-4 h-4" />
-                      Download Back
-                    </a>
-                  </div>
-                </div>
-              </div>
-            )}
 
-            {!member.hasCard && (
+                {/* Mock-generated cards (front + back) */}
+                {mockCardUrl ? (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Front</p>
+                      <img
+                        src={mockCardUrl}
+                        alt="Card Front"
+                        className="w-full rounded-xl shadow-lg border border-slate-200"
+                      />
+                      <a
+                        href={mockCardUrl}
+                        download={`${member.memberId || 'card'}_front.png`}
+                        className="flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-all"
+                      >
+                        <Download className="w-4 h-4" />
+                        Download Front
+                      </a>
+                    </div>
+                    {mockCardBackUrl && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Back</p>
+                        <img
+                          src={mockCardBackUrl}
+                          alt="Card Back"
+                          className="w-full rounded-xl shadow-lg border border-slate-200"
+                        />
+                        <a
+                          href={mockCardBackUrl}
+                          download={`${member.memberId || 'card'}_back.png`}
+                          className="flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-all"
+                        >
+                          <Download className="w-4 h-4" />
+                          Download Back
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Real backend cards (front + back) */
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Front</p>
+                      <img
+                        src={getCardFrontUrl(id)}
+                        alt="Card Front"
+                        className="w-full rounded-xl shadow-lg border border-slate-200"
+                      />
+                      <a
+                        href={getCardFrontUrl(id)}
+                        download={`${member.memberId}_front.png`}
+                        className="flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-all"
+                      >
+                        <Download className="w-4 h-4" />
+                        Download Front
+                      </a>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Back</p>
+                      <img
+                        src={getCardBackUrl(id)}
+                        alt="Card Back"
+                        className="w-full rounded-xl shadow-lg border border-slate-200"
+                      />
+                      <a
+                        href={getCardBackUrl(id)}
+                        download={`${member.memberId}_back.png`}
+                        className="flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-all"
+                      >
+                        <Download className="w-4 h-4" />
+                        Download Back
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
               <div className="text-center py-8 bg-blue-50 border border-blue-200 rounded-xl mb-8">
                 <div className="animate-spin w-8 h-8 border-2 border-blue-300 border-t-blue-600 rounded-full mx-auto mb-3" />
                 <p className="text-sm font-medium text-blue-800">Generating your membership card...</p>

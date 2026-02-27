@@ -5,6 +5,8 @@ import {
   Download, Eye, Search, Filter, LogOut, Shield, Image, BarChart3
 } from 'lucide-react'
 import { setAdminAuth, getAdminDashboard, getAdminMembers, regenerateCard } from '../api'
+import { useTranslation } from '../contexts/TranslationContext'
+import LanguageToggle from '../components/LanguageToggle'
 
 const STATUS_COLORS = {
   PENDING_PAYMENT: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200', dot: 'bg-yellow-400' },
@@ -28,6 +30,7 @@ function StatusBadge({ status }) {
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [stats, setStats] = useState(null)
   const [members, setMembers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -90,7 +93,7 @@ export default function AdminDashboard() {
       m.fullName?.toLowerCase().includes(q) ||
       m.email?.toLowerCase().includes(q) ||
       m.memberId?.toLowerCase().includes(q) ||
-      m.licenseNumber?.toLowerCase().includes(q)
+      m.institution?.toLowerCase().includes(q)
     )
   })
 
@@ -112,12 +115,13 @@ export default function AdminDashboard() {
             <span className="text-sm font-semibold tracking-wide">APSUSM Admin</span>
           </div>
           <div className="flex items-center gap-4">
-            <button onClick={loadData} className="text-slate-400 hover:text-white transition-colors p-1.5" title="Refresh">
+            <LanguageToggle />
+            <button onClick={loadData} className="text-slate-400 hover:text-white transition-colors p-1.5" title={t('admin_refresh')}>
               <RefreshCw className="w-4 h-4" />
             </button>
             <button onClick={handleLogout} className="flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors">
               <LogOut className="w-4 h-4" />
-              Logout
+              {t('admin_logout')}
             </button>
           </div>
         </div>
@@ -188,13 +192,13 @@ export default function AdminDashboard() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50/50">
-                  <th className="text-left py-3 px-4 font-medium text-slate-500 text-xs uppercase tracking-wide">Member</th>
-                  <th className="text-left py-3 px-4 font-medium text-slate-500 text-xs uppercase tracking-wide">Member ID</th>
-                  <th className="text-left py-3 px-4 font-medium text-slate-500 text-xs uppercase tracking-wide">License</th>
-                  <th className="text-left py-3 px-4 font-medium text-slate-500 text-xs uppercase tracking-wide">Province</th>
-                  <th className="text-left py-3 px-4 font-medium text-slate-500 text-xs uppercase tracking-wide">Status</th>
-                  <th className="text-left py-3 px-4 font-medium text-slate-500 text-xs uppercase tracking-wide">Registered</th>
-                  <th className="text-left py-3 px-4 font-medium text-slate-500 text-xs uppercase tracking-wide">Actions</th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-500 text-xs uppercase tracking-wide">{t('admin_col_member')}</th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-500 text-xs uppercase tracking-wide">{t('admin_col_member_id')}</th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-500 text-xs uppercase tracking-wide">{t('reg_position')}</th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-500 text-xs uppercase tracking-wide">{t('admin_col_province')}</th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-500 text-xs uppercase tracking-wide">{t('admin_col_status')}</th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-500 text-xs uppercase tracking-wide">{t('admin_col_registered')}</th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-500 text-xs uppercase tracking-wide">{t('admin_col_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -214,7 +218,7 @@ export default function AdminDashboard() {
                         </div>
                       </td>
                       <td className="py-3 px-4 font-mono text-xs text-slate-600">{m.memberId || '—'}</td>
-                      <td className="py-3 px-4 font-mono text-xs text-slate-600">{m.licenseNumber}</td>
+                      <td className="py-3 px-4 text-xs text-slate-600">{m.position || '—'}</td>
                       <td className="py-3 px-4 text-slate-600">{m.province}</td>
                       <td className="py-3 px-4"><StatusBadge status={m.status} /></td>
                       <td className="py-3 px-4 text-xs text-slate-500">
@@ -273,7 +277,7 @@ export default function AdminDashboard() {
               <div className="p-6 space-y-4">
                 <div className="text-center pb-4 border-b border-slate-100">
                   <p className="text-xl font-semibold text-slate-900">{selectedMember.fullName}</p>
-                  <p className="text-sm text-slate-500">{selectedMember.specialization || 'Medical Professional'}</p>
+                  <p className="text-sm text-slate-500">{selectedMember.position || 'Health Professional'}</p>
                   {selectedMember.memberId && (
                     <p className="mt-2 font-mono text-sm text-brand-blue font-semibold">{selectedMember.memberId}</p>
                   )}
@@ -282,8 +286,8 @@ export default function AdminDashboard() {
                 {[
                   ['Email', selectedMember.email],
                   ['Phone', selectedMember.phone || '—'],
-                  ['License', selectedMember.licenseNumber],
                   ['Institution', selectedMember.institution || '—'],
+                  ['Position', selectedMember.position || '—'],
                   ['Province', selectedMember.province],
                   ['Status', selectedMember.status],
                   ['Registered', selectedMember.registeredAt ? new Date(selectedMember.registeredAt).toLocaleString() : '—'],

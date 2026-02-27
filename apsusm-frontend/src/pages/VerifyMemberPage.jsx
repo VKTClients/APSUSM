@@ -55,7 +55,7 @@ export default function VerifyMemberPage() {
               {[
                 ['Member ID', result.memberId],
                 ['Name', result.name],
-                ['Specialization', result.specialization || 'N/A'],
+                ['Position', result.position || 'N/A'],
                 ['Province', result.province || 'N/A'],
                 ['Status', result.status],
                 ['Expires', result.expiresAt ? new Date(result.expiresAt).toLocaleDateString() : 'N/A'],
