@@ -121,7 +121,7 @@ export default function RegisterPage() {
             <span className="w-1.5 h-1.5 rounded-full bg-brand-blue animate-pulse" />
             {t('reg_badge')}
           </div>
-          <h1 className="text-4xl md:text-5xl font-medium text-slate-900 tracking-tight leading-tight mb-4">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-medium text-slate-900 tracking-tight leading-tight mb-4">
             {t('reg_headline')}
           </h1>
           <p className="text-lg text-slate-500 font-light max-w-xl mx-auto">
@@ -152,7 +152,7 @@ export default function RegisterPage() {
                 </span>
               </div>
               {i < 2 && (
-                <div className={`w-20 h-0.5 mb-6 mx-2 ${step > s.num ? 'bg-slate-900' : 'bg-slate-200'}`} />
+                <div className={`w-10 sm:w-20 h-0.5 mb-6 mx-1 sm:mx-2 ${step > s.num ? 'bg-slate-900' : 'bg-slate-200'}`} />
               )}
             </React.Fragment>
           ))}
@@ -169,7 +169,7 @@ export default function RegisterPage() {
         )}
 
         {step === 1 && (
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+          <div className="bg-white p-5 sm:p-8 rounded-2xl shadow-sm border border-slate-200 space-y-5 sm:space-y-6">
             {/* Full Name */}
             <div className="space-y-2">
               <label className="text-xs font-medium text-slate-700">{t('reg_full_name')} *</label>
@@ -288,7 +288,7 @@ export default function RegisterPage() {
         )}
 
         {step === 2 && (
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+          <div className="bg-white p-5 sm:p-8 rounded-2xl shadow-sm border border-slate-200 space-y-5 sm:space-y-6">
             <h3 className="text-lg font-semibold text-slate-900">{t('reg_review_title')}</h3>
 
             <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
@@ -355,7 +355,7 @@ export default function RegisterPage() {
         )}
 
         {step === 3 && (
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center space-y-4">
+          <div className="bg-white p-5 sm:p-8 rounded-2xl shadow-sm border border-slate-200 text-center space-y-4">
             <Loader2 className="w-12 h-12 text-brand-blue mx-auto animate-spin" />
             <h3 className="text-lg font-semibold text-slate-900">{t('reg_redirecting')}</h3>
             <p className="text-sm text-slate-500">{t('reg_redirecting_desc')}</p>

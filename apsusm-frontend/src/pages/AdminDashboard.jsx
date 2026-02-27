@@ -109,10 +109,11 @@ export default function AdminDashboard() {
     <div className="min-h-screen pt-24 pb-12 bg-slate-50">
       {/* Admin Header */}
       <div className="bg-slate-900 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Shield className="w-5 h-5 text-brand-blue" />
-            <span className="text-sm font-semibold tracking-wide">APSUSM Admin</span>
+            <span className="text-sm font-semibold tracking-wide hidden sm:inline">APSUSM Admin</span>
+            <span className="text-sm font-semibold tracking-wide sm:hidden">Admin</span>
           </div>
           <div className="flex items-center gap-4">
             <LanguageToggle />
@@ -127,10 +128,10 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
         {/* Stats Cards */}
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-6 md:mb-8">
             {[
               { label: 'Total Members', value: stats.totalMembers, icon: Users, color: 'text-slate-700' },
               { label: 'Pending Payment', value: stats.pendingPayment, icon: Clock, color: 'text-yellow-600' },
@@ -139,13 +140,13 @@ export default function AdminDashboard() {
               { label: 'Cards Generated', value: stats.cardGenerated, icon: Image, color: 'text-emerald-600' },
               { label: 'Payment Failed', value: stats.paymentFailed, icon: XCircle, color: 'text-red-600' },
             ].map(s => (
-              <div key={s.label} className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <s.icon className={`w-5 h-5 ${s.color}`} />
-                  <BarChart3 className="w-3.5 h-3.5 text-slate-300" />
+              <div key={s.label} className="bg-white rounded-xl border border-slate-200 p-3 md:p-5 shadow-sm">
+                <div className="flex items-center justify-between mb-2 md:mb-3">
+                  <s.icon className={`w-4 md:w-5 h-4 md:h-5 ${s.color}`} />
+                  <BarChart3 className="w-3 md:w-3.5 h-3 md:h-3.5 text-slate-300" />
                 </div>
-                <p className="text-2xl font-semibold text-slate-900">{s.value}</p>
-                <p className="text-xs text-slate-500 mt-1">{s.label}</p>
+                <p className="text-xl md:text-2xl font-semibold text-slate-900">{s.value}</p>
+                <p className="text-[10px] md:text-xs text-slate-500 mt-1">{s.label}</p>
               </div>
             ))}
           </div>
@@ -267,7 +268,7 @@ export default function AdminDashboard() {
           <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setSelectedMember(null)}>
             <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
             <div
-              className="relative w-full max-w-md bg-white shadow-2xl overflow-y-auto animate-slide-up"
+              className="relative w-full max-w-md bg-white shadow-2xl overflow-y-auto animate-slide-in-right"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
@@ -349,7 +350,7 @@ export default function AdminDashboard() {
 
         {/* Card Lightbox */}
         {cardView && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-6" onClick={() => setCardView(null)}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6" onClick={() => setCardView(null)}>
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
             <div className="relative max-w-2xl w-full space-y-4" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between text-white mb-2">

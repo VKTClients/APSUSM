@@ -345,21 +345,21 @@ def render_card(
 # "MEMBRO DESDE" label — top-right area of the back card
 # The date renders directly below it, right-aligned with the label
 MEMBRO_DESDE = {
-    "label_right_x": 1380,   # right edge of "MEMBRO DESDE" label
-    "label_y": 75,            # baseline of the label text
-    "date_y_offset": 35,      # px below label baseline for the date
-    "date_font_size": 26,
+    "label_right_x": 1440,   # right edge of "MEMBRO DESDE" label
+    "label_y": 175,           # baseline of the label text
+    "date_y_offset": 45,      # px below label baseline for the date
+    "date_font_size": 32,
     "date_color": "#555555",
 }
 
 # "VÁLIDO ATÉ" label — bottom-left area of the back card
 # The date renders immediately to the right of the label, same baseline
 VALIDO_ATE = {
-    "label_x": 80,            # left edge of "VÁLIDO ATÉ" label
-    "label_y": 835,           # baseline of the label text
-    "label_font_size": 26,    # size used to measure label width
-    "date_gap": 12,           # px gap between label end and date start
-    "date_font_size": 26,
+    "label_x": 105,           # left edge of "VÁLIDO ATÉ" label
+    "label_y": 765,           # baseline of the label text
+    "label_font_size": 32,    # size used to measure label width
+    "date_gap": 15,           # px gap between label end and date start
+    "date_font_size": 32,
     "date_color": "#555555",
 }
 

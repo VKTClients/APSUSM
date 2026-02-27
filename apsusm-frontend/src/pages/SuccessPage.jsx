@@ -61,7 +61,7 @@ export default function SuccessPage() {
           <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-12 h-12 text-green-500" />
           </div>
-          <h1 className="text-3xl font-medium text-slate-900 tracking-tight mb-3">
+          <h1 className="text-2xl sm:text-3xl font-medium text-slate-900 tracking-tight mb-3">
             Welcome to APSUSM!
           </h1>
           <p className="text-slate-500 text-lg font-light">
@@ -76,7 +76,7 @@ export default function SuccessPage() {
               <div className="text-center mb-8">
                 <div className="inline-block px-8 py-4 bg-slate-900 rounded-xl">
                   <p className="text-xs text-slate-400 uppercase tracking-widest mb-1">Your Member ID</p>
-                  <p className="text-2xl font-bold text-white font-mono tracking-wider">{member.memberId}</p>
+                  <p className="text-lg sm:text-2xl font-bold text-white font-mono tracking-wider break-all">{member.memberId}</p>
                 </div>
               </div>
             )}
@@ -116,7 +116,7 @@ export default function SuccessPage() {
 
                 {/* Mock-generated cards (front + back) */}
                 {mockCardUrl ? (
-                  <div className="grid md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Front</p>
                       <img
@@ -154,7 +154,7 @@ export default function SuccessPage() {
                   </div>
                 ) : (
                   /* Real backend cards (front + back) */
-                  <div className="grid md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Front</p>
                       <img

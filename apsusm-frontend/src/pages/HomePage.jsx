@@ -48,14 +48,14 @@ export default function HomePage() {
   return (
     <div className="bg-[#f2f0eb] min-h-screen font-sans">
       {/* ── HERO ─────────────────────────────────────────────────── */}
-      <section className="min-h-screen pt-20 flex items-center">
+      <section className="min-h-[80vh] md:min-h-screen pt-20 flex items-center">
         <div className="max-w-7xl mx-auto px-6 w-full">
-          <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[calc(100vh-5rem)] py-16">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[calc(80vh-5rem)] md:min-h-[calc(100vh-5rem)] py-8 md:py-16">
 
             {/* Left — headline */}
             <div className="flex flex-col justify-center">
               {/* Tag */}
-              <div className="flex items-center gap-3 mb-10">
+              <div className="flex items-center gap-3 mb-6 md:mb-10">
                 <div className="w-6 h-px bg-slate-400" />
                 <div className="flex items-center gap-2 text-sm text-slate-600">
                   <div className="w-5 h-5 rounded-full border border-slate-400 flex items-center justify-center">
@@ -67,7 +67,7 @@ export default function HomePage() {
               </div>
 
               {/* Headline */}
-              <h1 className="text-[clamp(3rem,7vw,5.5rem)] font-bold text-slate-900 leading-[0.92] tracking-tight mb-8">
+              <h1 className="text-[clamp(2.25rem,7vw,5.5rem)] font-bold text-slate-900 leading-[0.92] tracking-tight mb-6 md:mb-8">
                 APSUSM<br />
                 {t('hero_title').split(' ').map((word, i) => (
                   <React.Fragment key={i}>
@@ -76,12 +76,12 @@ export default function HomePage() {
                 ))}
               </h1>
 
-              <p className="text-slate-500 text-lg font-light leading-relaxed max-w-md mb-10">
+              <p className="text-slate-500 text-base md:text-lg font-light leading-relaxed max-w-md mb-6 md:mb-10">
                 {t('hero_subtitle')}
               </p>
 
               {/* CTAs */}
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
                 <Link
                   to="/register"
                   className="bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium py-4 px-8 rounded-full transition-all shadow-lg shadow-slate-900/20 flex items-center gap-2"
@@ -100,7 +100,25 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right — floating cards */}
+            {/* Mobile — compact card preview */}
+            <div className="flex lg:hidden justify-center mt-4 mb-2">
+              <div className="w-full max-w-xs bg-slate-900 text-white rounded-2xl p-5 shadow-2xl">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-7 h-7 rounded-full bg-brand-red/90 flex items-center justify-center">
+                    <Shield className="w-3.5 h-3.5 text-white" />
+                  </div>
+                  <span className="text-xs text-slate-400 font-mono tracking-widest">APSUSM</span>
+                </div>
+                <p className="text-xs text-slate-400 mb-1">Member ID</p>
+                <p className="font-mono font-semibold text-base tracking-widest text-white mb-3">APSUSM-2025-0042</p>
+                <div className="border-t border-slate-700 pt-3">
+                  <p className="text-sm font-medium text-white">Dr. Ana Machava</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Internal Medicine · Maputo</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop — floating cards */}
             <div className="relative hidden lg:flex items-center justify-center h-[520px]">
 
               {/* Background blob */}
@@ -178,11 +196,11 @@ export default function HomePage() {
       </section>
 
       {/* ── FEATURES ──────────────────────────────────────────────── */}
-      <section className="py-24 px-6">
+      <section className="py-12 md:py-24 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-14">
+          <div className="mb-8 md:mb-14">
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">{t('features_title')}</p>
-            <h2 className="text-4xl font-bold text-slate-900 tracking-tight max-w-lg">
+            <h2 className="text-2xl md:text-4xl font-bold text-slate-900 tracking-tight max-w-lg">
               {t('features_subtitle')}
             </h2>
           </div>
@@ -211,13 +229,13 @@ export default function HomePage() {
       </section>
 
       {/* ── MISSION ──────────────────────────────────────────────── */}
-      <section className="py-24 px-6 bg-white/50">
+      <section className="py-12 md:py-24 px-4 md:px-6 bg-white/50">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 items-start">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
             {/* Left — mission statement */}
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">{t('mission_label')}</p>
-              <h2 className="text-4xl font-bold text-slate-900 tracking-tight mb-6">
+              <h2 className="text-2xl md:text-4xl font-bold text-slate-900 tracking-tight mb-6">
                 {t('mission_title')}
               </h2>
               <p className="text-slate-500 leading-relaxed mb-6">
@@ -250,11 +268,11 @@ export default function HomePage() {
       </section>
 
       {/* ── HOW IT WORKS ──────────────────────────────────────────── */}
-      <section id="how-it-works" className="py-24 px-6 bg-white/50">
+      <section id="how-it-works" className="py-12 md:py-24 px-4 md:px-6 bg-white/50">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-14">
+          <div className="mb-8 md:mb-14">
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">{t('process_title')}</p>
-            <h2 className="text-4xl font-bold text-slate-900 tracking-tight">{t('process_subtitle')}</h2>
+            <h2 className="text-2xl md:text-4xl font-bold text-slate-900 tracking-tight">{t('process_subtitle')}</h2>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
@@ -275,12 +293,12 @@ export default function HomePage() {
       </section>
 
       {/* ── CTA BANNER ────────────────────────────────────────────── */}
-      <section className="py-20 px-6">
+      <section className="py-12 md:py-20 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-slate-900 rounded-3xl px-10 py-14 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="bg-slate-900 rounded-2xl md:rounded-3xl px-6 md:px-10 py-10 md:py-14 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
             <div>
               <p className="text-xs uppercase tracking-widest text-slate-400 mb-3">{t('cta_title')}</p>
-              <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight max-w-lg">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight max-w-lg text-center md:text-left">
                 {t('cta_subtitle')}
               </h2>
             </div>
@@ -299,7 +317,7 @@ export default function HomePage() {
       </section>
 
       {/* ── FOOTER ────────────────────────────────────────────────── */}
-      <footer className="border-t border-slate-300/50 py-10 px-6">
+      <footer className="border-t border-slate-300/50 py-8 md:py-10 px-4 md:px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-7 h-7 bg-gradient-to-br from-brand-blue to-brand-purple rounded-md flex items-center justify-center">

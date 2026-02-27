@@ -61,14 +61,26 @@ export default function Navbar() {
       </div>
 
       {open && (
-        <div className="md:hidden bg-white border-t border-slate-100 px-6 py-4 space-y-3">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Language</span>
+        <div className="md:hidden bg-white border-t border-slate-100 px-6 py-5 space-y-1 animate-fade-in">
+          <Link to="/" className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${isHome ? 'bg-slate-100 text-slate-900' : 'text-slate-600 active:bg-slate-50'}`} onClick={() => setOpen(false)}>{t('nav_home')}</Link>
+          <a href="/#how-it-works" className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-slate-600 active:bg-slate-50 transition-colors" onClick={() => setOpen(false)}>{t('nav_how_it_works')}</a>
+          <Link to="/register" className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/register' ? 'bg-slate-100 text-slate-900' : 'text-slate-600 active:bg-slate-50'}`} onClick={() => setOpen(false)}>{t('nav_register')}</Link>
+          <Link to="/admin" className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${isAdmin ? 'bg-slate-100 text-slate-900' : 'text-slate-600 active:bg-slate-50'}`} onClick={() => setOpen(false)}>{t('nav_admin')}</Link>
+          <div className="pt-3 border-t border-slate-100 mt-2 flex items-center justify-between">
             <LanguageToggle />
+            {import.meta.env.DEV && window.location.hostname === 'localhost' && (
+              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full border border-yellow-200">
+                {t('nav_mock_mode')}
+              </span>
+            )}
           </div>
-          <Link to="/" className="block text-sm font-medium text-slate-700" onClick={() => setOpen(false)}>{t('nav_home')}</Link>
-          <Link to="/register" className="block text-sm font-medium text-slate-700" onClick={() => setOpen(false)}>{t('nav_register')}</Link>
-          <Link to="/admin" className="block text-sm font-medium text-slate-700" onClick={() => setOpen(false)}>{t('nav_admin')}</Link>
+          <Link
+            to="/register"
+            className="block w-full text-center bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium py-3 rounded-full transition-all shadow-sm mt-3"
+            onClick={() => setOpen(false)}
+          >
+            {t('nav_apply')}
+          </Link>
         </div>
       )}
     </nav>
