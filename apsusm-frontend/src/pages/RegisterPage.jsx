@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Loader2, CheckCircle, AlertCircle, Camera, Shield, CreditCard, ArrowRight, FileCheck } from 'lucide-react'
-import { registerMember, initializePayment } from '../api'
+import { Loader2, CheckCircle, AlertCircle, Camera, Shield, CreditCard, ArrowRight, FileCheck, Sparkles, ImageIcon } from 'lucide-react'
+import { registerMember } from '../api'
 import { useTranslation } from '../contexts/TranslationContext'
 
 const PROVINCES = [
@@ -13,7 +13,7 @@ const PROVINCES = [
 export default function RegisterPage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const [step, setStep] = useState(1) // 1=form, 2=review, 3=payment
+  const [step, setStep] = useState(1) // 1=form, 2=review, 3=processing
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [photoPreview, setPhotoPreview] = useState(null)
@@ -22,15 +22,39 @@ export default function RegisterPage() {
   const [form, setForm] = useState({
     fullName: '', email: '', phone: '',
     institution: '', position: '',
-    province: '', photo: null, termsAccepted: false
+    province: '', photo: null, photoMode: 'original', termsAccepted: false
   })
+  const [touched, setTouched] = useState({})
 
-  const inputClass = "w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-400 transition-all placeholder:text-slate-400"
+  const fieldError = (name) => {
+    if (!touched[name]) return null
+    switch (name) {
+      case 'fullName': return !form.fullName.trim() ? t('reg_error_name') : null
+      case 'phone': return !form.phone.trim() ? t('reg_error_phone') : null
+      case 'email':
+        if (!form.email.trim()) return t('reg_error_email')
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return t('reg_error_email_format')
+        return null
+      case 'institution': return !form.institution.trim() ? t('reg_error_institution') : null
+      case 'position': return !form.position.trim() ? t('reg_error_position') : null
+      case 'province': return !form.province ? t('reg_error_province') : null
+      default: return null
+    }
+  }
+
+  const handleBlur = (e) => setTouched({ ...touched, [e.target.name]: true })
+
+  const inputClass = (name) => {
+    const hasError = fieldError(name)
+    return `w-full px-4 py-3 bg-white border rounded-lg text-sm focus:outline-none focus:ring-4 transition-all placeholder:text-slate-400 ${
+      hasError ? 'border-red-300 focus:ring-red-100 focus:border-red-400' : 'border-slate-200 focus:ring-slate-900/5 focus:border-slate-400'
+    }`
+  }
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
     setForm({ ...form, [name]: type === 'checkbox' ? checked : value })
-    setError('')
+    if (error) setError('')
   }
 
   const handlePhoto = (e) => {
@@ -83,6 +107,7 @@ export default function RegisterPage() {
       formData.append('position', form.position)
       formData.append('province', form.province)
       formData.append('photo', form.photo)
+      formData.append('photoMode', form.photoMode)
 
       const result = await registerMember(formData)
 
@@ -90,13 +115,7 @@ export default function RegisterPage() {
         setRegisteredId(result.memberId)
         setStep(3)
 
-        // Initialize payment
-        const payResult = await initializePayment(result.memberId)
-        if (payResult.success && payResult.authorizationUrl) {
-          window.location.href = payResult.authorizationUrl
-        } else {
-          setError(payResult.message || t('reg_error_payment'))
-        }
+        navigate(`/success/${result.memberId}`)
       } else {
         setError(result.message || t('reg_error_failed'))
       }
@@ -136,7 +155,7 @@ export default function RegisterPage() {
           {[
             { num: 1, label: t('reg_step_details') },
             { num: 2, label: t('reg_step_review') },
-            { num: 3, label: t('reg_step_payment') }
+            { num: 3, label: t('reg_step_complete') }
           ].map((s, i) => (
             <React.Fragment key={s.num}>
               <div className="flex flex-col items-center gap-2">
@@ -172,64 +191,81 @@ export default function RegisterPage() {
           <div className="bg-white p-5 sm:p-8 rounded-2xl shadow-sm border border-slate-200 space-y-5 sm:space-y-6">
             {/* Full Name */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700">{t('reg_full_name')} *</label>
+              <label htmlFor="fullName" className="text-xs font-medium text-slate-700">{t('reg_full_name')} *</label>
               <input
-                name="fullName" value={form.fullName} onChange={handleChange}
-                className={inputClass}
+                id="fullName" name="fullName" value={form.fullName} onChange={handleChange} onBlur={handleBlur}
+                className={inputClass('fullName')}
                 placeholder={t('reg_full_name_placeholder')}
+                aria-invalid={!!fieldError('fullName')} aria-describedby={fieldError('fullName') ? 'err-fullName' : undefined}
+                autoComplete="name"
               />
+              {fieldError('fullName') && <p id="err-fullName" className="text-xs text-red-500" role="alert">{fieldError('fullName')}</p>}
             </div>
 
             {/* Phone */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700">{t('reg_phone')} *</label>
+              <label htmlFor="phone" className="text-xs font-medium text-slate-700">{t('reg_phone')} *</label>
               <input
-                name="phone" value={form.phone} onChange={handleChange}
-                className={inputClass}
+                id="phone" name="phone" value={form.phone} onChange={handleChange} onBlur={handleBlur}
+                className={inputClass('phone')}
                 placeholder="+258 84 000 0000"
+                aria-invalid={!!fieldError('phone')} aria-describedby={fieldError('phone') ? 'err-phone' : undefined}
+                autoComplete="tel"
               />
+              {fieldError('phone') && <p id="err-phone" className="text-xs text-red-500" role="alert">{fieldError('phone')}</p>}
             </div>
 
             {/* Email */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700">{t('reg_email')} *</label>
+              <label htmlFor="email" className="text-xs font-medium text-slate-700">{t('reg_email')} *</label>
               <input
-                name="email" type="email" value={form.email} onChange={handleChange}
-                className={inputClass}
+                id="email" name="email" type="email" value={form.email} onChange={handleChange} onBlur={handleBlur}
+                className={inputClass('email')}
                 placeholder={t('reg_email_placeholder')}
+                aria-invalid={!!fieldError('email')} aria-describedby={fieldError('email') ? 'err-email' : undefined}
+                autoComplete="email"
               />
+              {fieldError('email') && <p id="err-email" className="text-xs text-red-500" role="alert">{fieldError('email')}</p>}
             </div>
 
             {/* Institution */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700">{t('reg_institution')} *</label>
+              <label htmlFor="institution" className="text-xs font-medium text-slate-700">{t('reg_institution')} *</label>
               <input
-                name="institution" value={form.institution} onChange={handleChange}
-                className={inputClass}
+                id="institution" name="institution" value={form.institution} onChange={handleChange} onBlur={handleBlur}
+                className={inputClass('institution')}
                 placeholder={t('reg_institution_placeholder')}
+                aria-invalid={!!fieldError('institution')} aria-describedby={fieldError('institution') ? 'err-institution' : undefined}
+                autoComplete="organization"
               />
+              {fieldError('institution') && <p id="err-institution" className="text-xs text-red-500" role="alert">{fieldError('institution')}</p>}
             </div>
 
             {/* Position / Occupation */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700">{t('reg_position')} *</label>
+              <label htmlFor="position" className="text-xs font-medium text-slate-700">{t('reg_position')} *</label>
               <input
-                name="position" value={form.position} onChange={handleChange}
-                className={inputClass}
+                id="position" name="position" value={form.position} onChange={handleChange} onBlur={handleBlur}
+                className={inputClass('position')}
                 placeholder={t('reg_position_placeholder')}
+                aria-invalid={!!fieldError('position')} aria-describedby={fieldError('position') ? 'err-position' : undefined}
+                autoComplete="organization-title"
               />
+              {fieldError('position') && <p id="err-position" className="text-xs text-red-500" role="alert">{fieldError('position')}</p>}
             </div>
 
             {/* Province */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700">{t('reg_province')} *</label>
+              <label htmlFor="province" className="text-xs font-medium text-slate-700">{t('reg_province')} *</label>
               <select
-                name="province" value={form.province} onChange={handleChange}
-                className={`${inputClass} text-slate-600 appearance-none cursor-pointer`}
+                id="province" name="province" value={form.province} onChange={handleChange} onBlur={handleBlur}
+                className={`${inputClass('province')} text-slate-600 appearance-none cursor-pointer`}
+                aria-invalid={!!fieldError('province')}
               >
                 <option value="">{t('reg_province_placeholder')}</option>
                 {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
+              {fieldError('province') && <p className="text-xs text-red-500" role="alert">{fieldError('province')}</p>}
             </div>
 
             {/* Photo Upload */}
@@ -260,6 +296,58 @@ export default function RegisterPage() {
                   <input type="file" accept="image/jpeg,image/png,image/jpg" onChange={handlePhoto} className="hidden" />
                 </label>
               </div>
+
+              {/* Photo Mode Selector — shown after photo is uploaded */}
+              {photoPreview && (
+                <div className="mt-4 space-y-3">
+                  <p className="text-xs font-medium text-slate-700">{t('reg_photo_mode_label')}</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Option 1: Original */}
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, photoMode: 'original' })}
+                      className={`relative rounded-xl p-4 text-left border-2 transition-all ${
+                        form.photoMode === 'original'
+                          ? 'border-slate-900 bg-slate-50 shadow-sm'
+                          : 'border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      {form.photoMode === 'original' && (
+                        <div className="absolute top-2 right-2">
+                          <CheckCircle className="w-4 h-4 text-slate-900" />
+                        </div>
+                      )}
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center mb-2">
+                        <ImageIcon className="w-4 h-4 text-slate-600" />
+                      </div>
+                      <p className="text-sm font-semibold text-slate-900">{t('reg_photo_mode_original')}</p>
+                      <p className="text-xs text-slate-500 mt-1 leading-relaxed">{t('reg_photo_mode_original_desc')}</p>
+                    </button>
+
+                    {/* Option 2: AI Enhanced */}
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, photoMode: 'enhanced' })}
+                      className={`relative rounded-xl p-4 text-left border-2 transition-all ${
+                        form.photoMode === 'enhanced'
+                          ? 'border-slate-900 bg-slate-50 shadow-sm'
+                          : 'border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      {form.photoMode === 'enhanced' && (
+                        <div className="absolute top-2 right-2">
+                          <CheckCircle className="w-4 h-4 text-slate-900" />
+                        </div>
+                      )}
+                      <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center mb-2">
+                        <Sparkles className="w-4 h-4 text-purple-600" />
+                      </div>
+                      <p className="text-sm font-semibold text-slate-900">{t('reg_photo_mode_enhanced')}</p>
+                      <p className="text-xs text-slate-500 mt-1 leading-relaxed">{t('reg_photo_mode_enhanced_desc')}</p>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Terms & Conditions */}
@@ -308,6 +396,7 @@ export default function RegisterPage() {
                 [t('reg_institution'), form.institution],
                 [t('reg_position'), form.position],
                 [t('reg_province'), form.province],
+                [t('reg_photo_mode_review'), form.photoMode === 'enhanced' ? `✨ ${t('reg_photo_mode_enhanced')}` : t('reg_photo_mode_original')],
               ].map(([label, value]) => (
                 <div key={label} className="flex justify-between py-2 border-b border-slate-100">
                   <span className="text-sm text-slate-500">{label}</span>

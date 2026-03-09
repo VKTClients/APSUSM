@@ -14,8 +14,10 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -28,43 +30,37 @@ public class CardGenerationService {
 
     private static final Logger log = LoggerFactory.getLogger(CardGenerationService.class);
 
-    // Card dimensions (standard CR80 card at 300 DPI)
+    // Card dimensions for back card (Java2D)
     private static final int CARD_WIDTH = 1012;
     private static final int CARD_HEIGHT = 638;
     private static final int CORNER_RADIUS = 30;
-
-    // Brand colors matching the APSUSM design
-    private static final Color BG_DARK = new Color(10, 10, 10);
-    private static final Color TEXT_WHITE = new Color(255, 255, 255);
-    private static final Color TEXT_GRAY = new Color(156, 163, 175);
-    private static final Color TEXT_LIGHT_GRAY = new Color(107, 114, 128);
-    private static final Color BRAND_BLUE = new Color(0, 122, 204);
-    private static final Color BRAND_RED = new Color(215, 25, 32);
-    private static final Color BRAND_GREEN = new Color(139, 197, 63);
-    private static final Color BRAND_PURPLE = new Color(102, 45, 145);
-    private static final Color CHIP_LIGHT = new Color(200, 200, 210);
-    private static final Color CHIP_DARK = new Color(160, 160, 175);
-    private static final Color PHOTO_BG = new Color(30, 30, 40);
-    private static final Color GRID_LINE = new Color(255, 255, 255, 8);
 
     // Back card colors
     private static final Color BACK_BG = new Color(245, 245, 250);
     private static final Color BACK_TEXT_DARK = new Color(30, 30, 50);
     private static final Color BACK_TEXT_GRAY = new Color(100, 100, 120);
     private static final Color BACK_BORDER = new Color(220, 220, 230);
+    private static final Color BRAND_BLUE = new Color(0, 122, 204);
+    private static final Color BRAND_GREEN = new Color(139, 197, 63);
+    private static final Color BRAND_PURPLE = new Color(102, 45, 145);
 
     @Value("${app.cards.dir}")
     private String cardsDir;
 
+    @Value("${app.card-generator.url:http://localhost:5500}")
+    private String cardGeneratorUrl;
+
     /**
      * Generate both front and back of the membership card.
+     * Front card: calls Python AI card generation service.
+     * Back card: generated locally with Java2D.
      * Returns paths: [frontPath, backPath]
      */
     public String[] generateCard(Member member) throws Exception {
-        log.info("Generating card for member: {}", member.getMemberId());
+        log.info("Generating card for member: {} (AI mode)", member.getMemberId());
 
-        BufferedImage frontCard = generateFrontCard(member);
-        BufferedImage backCard = generateBackCard(member);
+        // Ensure output directory exists
+        Files.createDirectories(Paths.get(cardsDir));
 
         String frontFilename = member.getMemberId().replace("-", "_") + "_front.png";
         String backFilename = member.getMemberId().replace("-", "_") + "_back.png";
@@ -72,110 +68,113 @@ public class CardGenerationService {
         Path frontPath = Paths.get(cardsDir, frontFilename);
         Path backPath = Paths.get(cardsDir, backFilename);
 
-        ImageIO.write(frontCard, "PNG", frontPath.toFile());
+        // Front card: call the Python AI service
+        byte[] frontPng = generateFrontCardAI(member);
+        Files.write(frontPath, frontPng);
+        log.info("AI front card saved: {} ({} bytes)", frontPath, frontPng.length);
+
+        // Back card: still generated locally with Java2D
+        BufferedImage backCard = generateBackCard(member);
         ImageIO.write(backCard, "PNG", backPath.toFile());
 
         log.info("Card generated successfully: {} and {}", frontPath, backPath);
         return new String[]{frontPath.toString(), backPath.toString()};
     }
 
-    private BufferedImage generateFrontCard(Member member) throws Exception {
-        BufferedImage card = new BufferedImage(CARD_WIDTH, CARD_HEIGHT, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = card.createGraphics();
-        enableAntialiasing(g);
+    // =========================================================================
+    // Front card: AI generation via Python Flask API
+    // =========================================================================
 
-        // Background with rounded corners
-        drawRoundedRect(g, 0, 0, CARD_WIDTH, CARD_HEIGHT, CORNER_RADIUS, BG_DARK);
+    /**
+     * Call the Python card generator's /api/generate-card-ai endpoint.
+     * Sends the member's photo + details as multipart form data.
+     * Returns raw PNG bytes of the AI-generated front card.
+     */
+    private byte[] generateFrontCardAI(Member member) throws Exception {
+        String endpoint = cardGeneratorUrl + "/api/generate-card-ai";
+        log.info("Calling AI card generator: {}", endpoint);
 
-        // Subtle tech grid pattern
-        g.setColor(GRID_LINE);
-        for (int x = 0; x < CARD_WIDTH; x += 20) {
-            g.drawLine(x, 0, x, CARD_HEIGHT);
-        }
-        for (int y = 0; y < CARD_HEIGHT; y += 20) {
-            g.drawLine(0, y, CARD_WIDTH, y);
-        }
+        String boundary = "----CardGenBoundary" + System.currentTimeMillis();
 
-        // Smart card chip (top-right)
-        drawChip(g, CARD_WIDTH - 140, 50);
+        URL url = new URL(endpoint);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+        conn.setConnectTimeout(30_000);
+        conn.setReadTimeout(120_000); // AI generation can take time
+        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
 
-        // APSUSM Logo area (top-left)
-        drawLogo(g, 50, 50);
+        try (OutputStream os = conn.getOutputStream()) {
+            // full_name
+            writeFormField(os, boundary, "full_name", member.getFullName());
 
-        // "APSUSM" text
-        g.setFont(new Font("SansSerif", Font.BOLD, 22));
-        g.setColor(TEXT_WHITE);
-        g.drawString("APSUSM", 100, 70);
+            // member_id
+            writeFormField(os, boundary, "member_id", member.getMemberId());
+            writeFormField(os, boundary, "user_id", String.valueOf(member.getId()));
 
-        // "VERIFIED MEMBER" subtitle
-        g.setFont(new Font("SansSerif", Font.PLAIN, 11));
-        g.setColor(TEXT_GRAY);
-        g.drawString("VERIFIED MEMBER", 100, 90);
+            // photo file
+            if (member.getPhotoPath() != null) {
+                File photoFile = new File(member.getPhotoPath());
+                if (photoFile.exists()) {
+                    writeFileField(os, boundary, "photo", photoFile);
+                } else {
+                    log.warn("Photo file not found: {}, sending placeholder", member.getPhotoPath());
+                    throw new FileNotFoundException("Member photo not found: " + member.getPhotoPath());
+                }
+            } else {
+                throw new IllegalStateException("Member has no photo path set");
+            }
 
-        // Portrait photo
-        drawPortrait(g, member, 50, 160, 150, 190);
-
-        // Member name
-        g.setFont(new Font("SansSerif", Font.BOLD, 28));
-        g.setColor(TEXT_WHITE);
-        String fullName = member.getFullName();
-        if (fullName.length() > 28) fullName = fullName.substring(0, 25) + "...";
-        g.drawString(fullName, 220, 220);
-
-        // Specialization with blue dot
-        g.setColor(BRAND_BLUE);
-        g.fillOval(220, 245, 10, 10);
-        g.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        g.setColor(TEXT_GRAY);
-        String spec = member.getSpecialization() != null ? member.getSpecialization() : "Medical Professional";
-        g.drawString(spec, 236, 256);
-
-        // License number
-        g.setFont(new Font("Monospaced", Font.PLAIN, 13));
-        g.setColor(TEXT_LIGHT_GRAY);
-        g.drawString("LIC: " + member.getLicenseNumber(), 220, 290);
-
-        // Institution
-        if (member.getInstitution() != null && !member.getInstitution().isEmpty()) {
-            g.drawString(member.getInstitution(), 220, 315);
+            // Close multipart
+            os.write(("--" + boundary + "--\r\n").getBytes());
+            os.flush();
         }
 
-        // Member ID (bottom left)
-        g.setFont(new Font("Monospaced", Font.BOLD, 16));
-        g.setColor(TEXT_WHITE);
-        g.drawString("ID: " + member.getMemberId(), 50, CARD_HEIGHT - 80);
-
-        // Province
-        g.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        g.setColor(TEXT_GRAY);
-        g.drawString(member.getProvince() != null ? member.getProvince() : "", 50, CARD_HEIGHT - 55);
-
-        // Expiry date (bottom right)
-        String expiry = member.getExpiresAt() != null
-                ? member.getExpiresAt().format(DateTimeFormatter.ofPattern("MM/yyyy"))
-                : LocalDateTime.now().plusYears(1).format(DateTimeFormatter.ofPattern("MM/yyyy"));
-        g.setFont(new Font("Monospaced", Font.PLAIN, 13));
-        g.setColor(TEXT_LIGHT_GRAY);
-        g.drawString("EXP: " + expiry, CARD_WIDTH - 200, CARD_HEIGHT - 80);
-
-        // Issue date
-        String issued = member.getPaidAt() != null
-                ? member.getPaidAt().format(DateTimeFormatter.ofPattern("MM/yyyy"))
-                : LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM/yyyy"));
-        g.drawString("ISS: " + issued, CARD_WIDTH - 200, CARD_HEIGHT - 55);
-
-        // Bottom gradient line (blue -> red -> green)
-        GradientPaint bottomGradient = new GradientPaint(0, 0, BRAND_BLUE, CARD_WIDTH / 2f, 0, BRAND_RED);
-        g.setPaint(bottomGradient);
-        g.fillRoundRect(0, CARD_HEIGHT - 8, CARD_WIDTH / 2, 8, 0, 0);
-
-        GradientPaint bottomGradient2 = new GradientPaint(CARD_WIDTH / 2f, 0, BRAND_RED, CARD_WIDTH, 0, BRAND_GREEN);
-        g.setPaint(bottomGradient2);
-        g.fillRoundRect(CARD_WIDTH / 2, CARD_HEIGHT - 8, CARD_WIDTH / 2, 8, 0, 0);
-
-        g.dispose();
-        return card;
+        int responseCode = conn.getResponseCode();
+        if (responseCode == 200) {
+            try (InputStream is = conn.getInputStream()) {
+                return is.readAllBytes();
+            }
+        } else {
+            String errorBody;
+            try (InputStream es = conn.getErrorStream()) {
+                errorBody = es != null ? new String(es.readAllBytes()) : "No error body";
+            }
+            log.error("AI card generation failed (HTTP {}): {}", responseCode, errorBody);
+            throw new RuntimeException("AI card generation failed (HTTP " + responseCode + "): " + errorBody);
+        }
     }
+
+    private void writeFormField(OutputStream os, String boundary, String name, String value) throws IOException {
+        os.write(("--" + boundary + "\r\n").getBytes());
+        os.write(("Content-Disposition: form-data; name=\"" + name + "\"\r\n").getBytes());
+        os.write("\r\n".getBytes());
+        os.write((value != null ? value : "").getBytes("UTF-8"));
+        os.write("\r\n".getBytes());
+    }
+
+    private void writeFileField(OutputStream os, String boundary, String fieldName, File file) throws IOException {
+        String filename = file.getName();
+        String mimeType = filename.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
+
+        os.write(("--" + boundary + "\r\n").getBytes());
+        os.write(("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + filename + "\"\r\n").getBytes());
+        os.write(("Content-Type: " + mimeType + "\r\n").getBytes());
+        os.write("\r\n".getBytes());
+
+        try (FileInputStream fis = new FileInputStream(file)) {
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = fis.read(buffer)) != -1) {
+                os.write(buffer, 0, len);
+            }
+        }
+        os.write("\r\n".getBytes());
+    }
+
+    // =========================================================================
+    // Back card: Java2D (kept as-is)
+    // =========================================================================
 
     private BufferedImage generateBackCard(Member member) throws Exception {
         BufferedImage card = new BufferedImage(CARD_WIDTH, CARD_HEIGHT, BufferedImage.TYPE_INT_ARGB);
@@ -286,113 +285,9 @@ public class CardGenerationService {
         return card;
     }
 
-    private void drawPortrait(Graphics2D g, Member member, int x, int y, int w, int h) {
-        // Photo border
-        g.setColor(new Color(50, 50, 60));
-        g.fillRoundRect(x - 2, y - 2, w + 4, h + 4, 10, 10);
-
-        // Photo background
-        g.setColor(PHOTO_BG);
-        g.fillRoundRect(x, y, w, h, 8, 8);
-
-        // Try to load and draw the actual photo
-        if (member.getPhotoPath() != null) {
-            try {
-                BufferedImage photo = ImageIO.read(new File(member.getPhotoPath()));
-                if (photo != null) {
-                    // Scale and crop to fit
-                    BufferedImage scaled = scaleAndCrop(photo, w, h);
-
-                    // Clip to rounded rect
-                    Shape clip = g.getClip();
-                    g.setClip(new RoundRectangle2D.Float(x, y, w, h, 8, 8));
-                    g.drawImage(scaled, x, y, w, h, null);
-                    g.setClip(clip);
-                    return;
-                }
-            } catch (IOException e) {
-                log.warn("Could not load photo: {}", member.getPhotoPath(), e);
-            }
-        }
-
-        // Placeholder silhouette if no photo
-        g.setColor(TEXT_LIGHT_GRAY);
-        g.fillOval(x + w / 2 - 25, y + 30, 50, 50);
-        g.fillRoundRect(x + w / 2 - 35, y + 90, 70, 60, 20, 20);
-    }
-
-    private BufferedImage scaleAndCrop(BufferedImage source, int targetW, int targetH) {
-        double sourceRatio = (double) source.getWidth() / source.getHeight();
-        double targetRatio = (double) targetW / targetH;
-
-        int cropW, cropH, cropX, cropY;
-        if (sourceRatio > targetRatio) {
-            cropH = source.getHeight();
-            cropW = (int) (cropH * targetRatio);
-            cropX = (source.getWidth() - cropW) / 2;
-            cropY = 0;
-        } else {
-            cropW = source.getWidth();
-            cropH = (int) (cropW / targetRatio);
-            cropX = 0;
-            cropY = (source.getHeight() - cropH) / 2;
-        }
-
-        BufferedImage cropped = source.getSubimage(cropX, cropY, cropW, cropH);
-        BufferedImage scaled = new BufferedImage(targetW, targetH, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = scaled.createGraphics();
-        enableAntialiasing(g);
-        g.drawImage(cropped, 0, 0, targetW, targetH, null);
-        g.dispose();
-        return scaled;
-    }
-
-    private void drawLogo(Graphics2D g, int x, int y) {
-        // Simplified APSUSM logo - cross with leaf
-        int size = 36;
-
-        // Ring arc
-        GradientPaint ringGrad = new GradientPaint(x, y, BRAND_PURPLE, x + size, y, BRAND_RED);
-        g.setPaint(ringGrad);
-        g.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g.drawArc(x, y, size, size, -30, -120);
-
-        // Red cross
-        g.setColor(BRAND_RED);
-        int cx = x + size / 2;
-        int cy = y + size / 2;
-        g.fillRect(cx - 7, cy - 2, 14, 4);
-        g.fillRect(cx - 2, cy - 7, 4, 14);
-
-        // Blue and green stethoscope arcs
-        g.setColor(BRAND_BLUE);
-        g.setStroke(new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g.drawArc(x + 2, y + 2, size / 2, size / 2, 60, 120);
-
-        g.setColor(BRAND_GREEN);
-        g.drawArc(x + size / 2 - 2, y + 2, size / 2, size / 2, 0, 120);
-
-        g.setStroke(new BasicStroke(1));
-    }
-
-    private void drawChip(Graphics2D g, int x, int y) {
-        int w = 55;
-        int h = 40;
-
-        // Chip body
-        GradientPaint chipGrad = new GradientPaint(x, y, CHIP_LIGHT, x + w, y + h, CHIP_DARK);
-        g.setPaint(chipGrad);
-        g.fillRoundRect(x, y, w, h, 6, 6);
-
-        // Chip border
-        g.setColor(new Color(140, 140, 155));
-        g.drawRoundRect(x, y, w, h, 6, 6);
-
-        // Chip internal lines
-        g.setColor(new Color(140, 140, 155, 100));
-        g.drawLine(x + w / 2, y + 4, x + w / 2, y + h - 4);
-        g.drawLine(x + 4, y + h / 2, x + w - 4, y + h / 2);
-    }
+    // =========================================================================
+    // Shared utilities
+    // =========================================================================
 
     private void drawRoundedRect(Graphics2D g, int x, int y, int w, int h, int r, Color color) {
         g.setColor(color);

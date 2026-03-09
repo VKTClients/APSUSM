@@ -32,32 +32,49 @@ public class RegistrationController {
      */
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> register(
-            @RequestParam("firstName") String firstName,
-            @RequestParam("lastName") String lastName,
+            @RequestParam(value = "fullName", required = false) String fullName,
+            @RequestParam(value = "firstName", required = false) String firstName,
+            @RequestParam(value = "lastName", required = false) String lastName,
             @RequestParam("email") String email,
             @RequestParam(value = "phone", required = false) String phone,
-            @RequestParam("licenseNumber") String licenseNumber,
+            @RequestParam(value = "licenseNumber", required = false) String licenseNumber,
             @RequestParam(value = "institution", required = false) String institution,
+            @RequestParam(value = "position", required = false) String position,
             @RequestParam(value = "specialization", required = false) String specialization,
             @RequestParam("province") String province,
             @RequestParam("photo") MultipartFile photo) {
 
         try {
+            String resolvedFirstName = firstName != null ? firstName.trim() : "";
+            String resolvedLastName = lastName != null ? lastName.trim() : "";
+            String resolvedLicenseNumber = licenseNumber != null ? licenseNumber.trim() : "";
+            if ((resolvedFirstName.isBlank() || resolvedLastName.isBlank()) && fullName != null) {
+                String[] parts = fullName.trim().split("\\s+", 2);
+                if (resolvedFirstName.isBlank() && parts.length > 0) {
+                    resolvedFirstName = parts[0];
+                }
+                if (resolvedLastName.isBlank()) {
+                    resolvedLastName = parts.length > 1 ? parts[1] : "Member";
+                }
+            }
+
             RegistrationRequest request = new RegistrationRequest();
-            request.setFirstName(firstName);
-            request.setLastName(lastName);
+            request.setFirstName(resolvedFirstName);
+            request.setLastName(resolvedLastName);
             request.setEmail(email);
             request.setPhone(phone);
-            request.setLicenseNumber(licenseNumber);
+            request.setLicenseNumber(!resolvedLicenseNumber.isBlank() ? resolvedLicenseNumber : email);
             request.setInstitution(institution);
-            request.setSpecialization(specialization);
+            request.setSpecialization(
+                    specialization != null && !specialization.isBlank() ? specialization : position
+            );
             request.setProvince(province);
 
             Member member = memberService.registerMember(request, photo);
 
             return ResponseEntity.ok(Map.of(
                     "success", true,
-                    "message", "Registration successful. Proceed to payment.",
+                    "message", "Registration successful.",
                     "memberId", member.getId(),
                     "member", memberService.toResponse(member)
             ));

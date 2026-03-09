@@ -91,17 +91,24 @@ const translations = {
     reg_photo_hint: 'Clear face photo, shoulders up',
     reg_photo_change: 'Click to change',
 
+    reg_photo_mode_label: 'How should we use your photo?',
+    reg_photo_mode_original: 'Use Original',
+    reg_photo_mode_original_desc: 'Use your photo exactly as uploaded — no edits.',
+    reg_photo_mode_enhanced: 'AI Enhanced',
+    reg_photo_mode_enhanced_desc: 'Improve background & lighting while keeping your real face.',
+    reg_photo_mode_review: 'Photo Mode',
+
     reg_terms_label: 'I accept the terms and conditions of APSUSM membership. I confirm that the information provided is accurate and I consent to its use for membership purposes.',
 
     reg_review_btn: 'Review Details',
     reg_review_title: 'Review Your Details',
     reg_edit_btn: 'Edit Details',
-    reg_confirm_btn: 'Confirm & Pay',
-    reg_processing: 'Processing...',
-    reg_payment_required: 'Payment Required',
-    reg_payment_desc: 'After confirming, you will be redirected to Paystack to complete your membership payment. Your card will be generated after successful payment.',
-    reg_redirecting: 'Redirecting to Payment...',
-    reg_redirecting_desc: 'You will be redirected to Paystack to complete your membership payment.',
+    reg_confirm_btn: 'Confirm Registration',
+    reg_processing: 'Finalizing...',
+    reg_payment_required: 'No Payment Required',
+    reg_payment_desc: 'Registration is temporarily free for already-paid members. After confirming, we will finalize your registration and generate your card.',
+    reg_redirecting: 'Finalizing Registration...',
+    reg_redirecting_desc: 'Please wait while we save your details and prepare your membership card.',
     reg_go_back: 'Go back and try again',
     reg_privacy: 'Your data is end-to-end encrypted and strictly confidential.',
 
@@ -185,6 +192,51 @@ const translations = {
     admin_regenerate: 'Regenerate Card',
     admin_download_front: 'Front',
     admin_download_back: 'Back',
+
+    // Navigation — Donate
+    nav_donate: 'Donate',
+
+    // Donations Page
+    donate_badge: 'Support Our Mission',
+    donate_headline: 'Help Us Empower Health Professionals',
+    donate_subtitle: 'Your contribution directly supports advocacy, training, and better working conditions for health professionals across Mozambique.',
+
+    donate_impact_label: 'Your Impact',
+    donate_impact_title: 'Where Your Donation Goes',
+    donate_impact_equipment_title: 'Medical Equipment',
+    donate_impact_equipment_desc: 'Help provide essential medical supplies and equipment to underserved health facilities.',
+    donate_impact_training_title: 'Professional Training',
+    donate_impact_training_desc: 'Fund workshops, seminars, and continuing education programs for health workers.',
+    donate_impact_community_title: 'Community Outreach',
+    donate_impact_community_desc: 'Support health campaigns and community awareness programs in rural areas.',
+    donate_impact_advocacy_title: 'Rights Advocacy',
+    donate_impact_advocacy_desc: 'Strengthen legal and policy advocacy for better working conditions and fair wages.',
+
+    donate_amount_label: 'Make a Donation',
+    donate_amount_title: 'Choose an Amount',
+    donate_tier_supporter: 'Supporter',
+    donate_tier_champion: 'Champion',
+    donate_tier_patron: 'Patron',
+    donate_tier_benefactor: 'Benefactor',
+    donate_custom_amount: 'Or enter a custom amount',
+    donate_cta_button: 'Donate Now',
+    donate_cta_note: 'Secure payment · Tax deductible · Every amount helps',
+
+    donate_bank_label: 'Bank Transfer',
+    donate_bank_title: 'Transfer Directly',
+    donate_bank_name: 'Account Name',
+    donate_bank_bank: 'Bank',
+    donate_bank_account: 'Account Number',
+    donate_bank_nib: 'NIB',
+    donate_bank_reference: 'Please include your name or email as the transfer reference so we can acknowledge your donation.',
+
+    donate_trust_title: 'Transparent & Accountable',
+    donate_trust_desc: 'APSUSM publishes annual financial reports. Every donation is tracked and allocated to our core mission areas.',
+
+    donate_bottom_cta_label: 'Become a member',
+    donate_bottom_cta_title: 'Want to do more? Join APSUSM as a member.',
+    donate_bottom_cta_button: 'Apply for Membership',
+    donate_bottom_cta_note: 'Members receive a verified digital card',
 
     // Footer
     footer_copyright: 'Associação dos Profissionais de Saúde Unidos e Solidários de Moçambique.',
@@ -280,17 +332,24 @@ const translations = {
     reg_photo_hint: 'Foto clara do rosto, dos ombros para cima',
     reg_photo_change: 'Clique para alterar',
 
+    reg_photo_mode_label: 'Como devemos usar a sua foto?',
+    reg_photo_mode_original: 'Usar Original',
+    reg_photo_mode_original_desc: 'Usar a sua foto exatamente como foi carregada — sem edições.',
+    reg_photo_mode_enhanced: 'Melhorada por IA',
+    reg_photo_mode_enhanced_desc: 'Melhorar fundo e iluminação mantendo o seu rosto real.',
+    reg_photo_mode_review: 'Modo de Foto',
+
     reg_terms_label: 'Aceito os termos e condições de filiação da APSUSM. Confirmo que as informações fornecidas são precisas e consinto com seu uso para fins de filiação.',
 
     reg_review_btn: 'Revisar Dados',
     reg_review_title: 'Revise Seus Dados',
     reg_edit_btn: 'Editar Dados',
-    reg_confirm_btn: 'Confirmar e Pagar',
-    reg_processing: 'Processando...',
-    reg_payment_required: 'Pagamento Necessário',
-    reg_payment_desc: 'Após confirmar, você será redirecionado ao Paystack para completar o pagamento da filiação. Seu cartão será gerado após o pagamento bem-sucedido.',
-    reg_redirecting: 'Redirecionando para Pagamento...',
-    reg_redirecting_desc: 'Você será redirecionado ao Paystack para completar o pagamento da sua filiação.',
+    reg_confirm_btn: 'Confirmar Registo',
+    reg_processing: 'A concluir...',
+    reg_payment_required: 'Sem Pagamento Necessário',
+    reg_payment_desc: 'O registo está temporariamente gratuito para membros já pagos. Após confirmar, vamos concluir o seu registo e gerar o seu cartão.',
+    reg_redirecting: 'A concluir o registo...',
+    reg_redirecting_desc: 'Aguarde enquanto guardamos os seus dados e preparamos o seu cartão de membro.',
     reg_go_back: 'Voltar e tentar novamente',
     reg_privacy: 'Seus dados são criptografados de ponta a ponta e estritamente confidenciais.',
 
@@ -374,6 +433,51 @@ const translations = {
     admin_regenerate: 'Regenerar Cartão',
     admin_download_front: 'Frente',
     admin_download_back: 'Verso',
+
+    // Navigation — Donate
+    nav_donate: 'Doar',
+
+    // Donations Page
+    donate_badge: 'Apoie a Nossa Missão',
+    donate_headline: 'Ajude-nos a Capacitar os Profissionais de Saúde',
+    donate_subtitle: 'A sua contribuição apoia diretamente a advocacia, formação e melhores condições de trabalho para os profissionais de saúde em todo Moçambique.',
+
+    donate_impact_label: 'O Seu Impacto',
+    donate_impact_title: 'Para Onde Vai a Sua Doação',
+    donate_impact_equipment_title: 'Equipamento Médico',
+    donate_impact_equipment_desc: 'Ajude a fornecer suprimentos e equipamentos médicos essenciais a unidades de saúde carenciadas.',
+    donate_impact_training_title: 'Formação Profissional',
+    donate_impact_training_desc: 'Financie workshops, seminários e programas de educação contínua para profissionais de saúde.',
+    donate_impact_community_title: 'Alcance Comunitário',
+    donate_impact_community_desc: 'Apoie campanhas de saúde e programas de sensibilização comunitária em áreas rurais.',
+    donate_impact_advocacy_title: 'Advocacia de Direitos',
+    donate_impact_advocacy_desc: 'Fortaleça a advocacia legal e política para melhores condições de trabalho e salários justos.',
+
+    donate_amount_label: 'Faça uma Doação',
+    donate_amount_title: 'Escolha um Valor',
+    donate_tier_supporter: 'Apoiador',
+    donate_tier_champion: 'Campeão',
+    donate_tier_patron: 'Patrono',
+    donate_tier_benefactor: 'Benfeitor',
+    donate_custom_amount: 'Ou insira um valor personalizado',
+    donate_cta_button: 'Doar Agora',
+    donate_cta_note: 'Pagamento seguro · Dedutível de impostos · Cada valor ajuda',
+
+    donate_bank_label: 'Transferência Bancária',
+    donate_bank_title: 'Transferir Diretamente',
+    donate_bank_name: 'Nome da Conta',
+    donate_bank_bank: 'Banco',
+    donate_bank_account: 'Número da Conta',
+    donate_bank_nib: 'NIB',
+    donate_bank_reference: 'Por favor inclua o seu nome ou email como referência da transferência para que possamos reconhecer a sua doação.',
+
+    donate_trust_title: 'Transparente e Responsável',
+    donate_trust_desc: 'A APSUSM publica relatórios financeiros anuais. Cada doação é rastreada e alocada às nossas áreas de missão.',
+
+    donate_bottom_cta_label: 'Torne-se membro',
+    donate_bottom_cta_title: 'Quer fazer mais? Junte-se à APSUSM como membro.',
+    donate_bottom_cta_button: 'Inscrever-se',
+    donate_bottom_cta_note: 'Membros recebem um cartão digital verificado',
 
     // Footer
     footer_copyright: 'Associação dos Profissionais de Saúde Unidos e Solidários de Moçambique.',

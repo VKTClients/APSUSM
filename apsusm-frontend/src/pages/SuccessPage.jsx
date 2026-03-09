@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { CheckCircle, Download, Mail, Shield, CreditCard } from 'lucide-react'
 import { getMemberStatus, getCardFrontUrl, getCardBackUrl, getMockCardUrl, getMockCardBackUrl } from '../api'
-import { shouldUseMock } from '../mockPaystack'
+import { shouldUseMock, generateCardViaAPI, generateBackCardViaAPI } from '../mockPaystack'
 
 export default function SuccessPage() {
   const { id } = useParams()
@@ -10,14 +10,39 @@ export default function SuccessPage() {
   const [loading, setLoading] = useState(true)
   const [mockCardUrl, setMockCardUrl] = useState(null)
   const [mockCardBackUrl, setMockCardBackUrl] = useState(null)
+  const [generating, setGenerating] = useState(false)
+  const [genError, setGenError] = useState(null)
+  const [genWarning, setGenWarning] = useState(null)
+  const [elapsed, setElapsed] = useState(0)
+  const timerRef = useRef(null)
+  const genStartedRef = useRef(false)
 
+  // Elapsed time counter while generating
   useEffect(() => {
-    // Check for mock-generated cards
+    if (generating) {
+      setElapsed(0)
+      timerRef.current = setInterval(() => setElapsed(s => s + 1), 1000)
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+  }, [generating])
+
+  // Fetch member status
+  useEffect(() => {
+    // Clear stale blob URLs from previous sessions — they don't survive page loads
     if (shouldUseMock()) {
-      const url = getMockCardUrl()
-      if (url) setMockCardUrl(url)
-      const backUrl = getMockCardBackUrl()
-      if (backUrl) setMockCardBackUrl(backUrl)
+      sessionStorage.removeItem('mockCardUrl')
+      sessionStorage.removeItem('mockCardBackUrl')
+      // Also clear stale cardUrl from stored mock member
+      const stored = sessionStorage.getItem('mockMember')
+      if (stored) {
+        const m = JSON.parse(stored)
+        delete m.cardUrl
+        delete m.cardBackUrl
+        m.hasCard = false
+        sessionStorage.setItem('mockMember', JSON.stringify(m))
+      }
     }
 
     const fetchStatus = async () => {
@@ -25,12 +50,10 @@ export default function SuccessPage() {
         const result = await getMemberStatus(id)
         if (result.success) {
           setMember(result.member)
-          // Also check if member has card URLs from mock
-          if (result.member.cardUrl) {
-            setMockCardUrl(result.member.cardUrl)
-          }
-          if (result.member.cardBackUrl) {
-            setMockCardBackUrl(result.member.cardBackUrl)
+          // Only use cardUrl from real backend, not mock (mock uses fresh generation)
+          if (!shouldUseMock()) {
+            if (result.member.cardUrl) setMockCardUrl(result.member.cardUrl)
+            if (result.member.cardBackUrl) setMockCardBackUrl(result.member.cardBackUrl)
           }
         }
       } catch (err) {
@@ -40,10 +63,65 @@ export default function SuccessPage() {
       }
     }
     fetchStatus()
-    // Poll for card generation (only needed for real backend)
     const interval = shouldUseMock() ? null : setInterval(fetchStatus, 3000)
     return () => { if (interval) clearInterval(interval) }
   }, [id])
+
+  // Trigger AI card generation once member data is loaded (mock mode)
+  useEffect(() => {
+    if (!member || !shouldUseMock()) return
+    if (genStartedRef.current) return
+    if (mockCardUrl) return // already have a card
+
+    // Check if member has photo data for generation
+    const stored = sessionStorage.getItem('mockMember')
+    if (!stored) return
+    const mockMember = JSON.parse(stored)
+    if (!mockMember.photoBase64) return
+
+    genStartedRef.current = true
+    setGenerating(true)
+    setGenError(null)
+    setGenWarning(null)
+
+    const generate = async () => {
+      try {
+        // Generate front card (AI — takes 15-30 seconds)
+        const frontUrl = await generateCardViaAPI(mockMember)
+        setMockCardUrl(frontUrl)
+
+        // Update stored member
+        mockMember.hasCard = true
+        mockMember.cardGeneratedAt = new Date().toISOString()
+        mockMember.cardUrl = frontUrl
+
+        // Generate back card (Pillow — fast)
+        try {
+          const backUrl = await generateBackCardViaAPI(mockMember)
+          setMockCardBackUrl(backUrl)
+          mockMember.cardBackUrl = backUrl
+        } catch (err) {
+          console.warn('Back card generation failed:', err)
+          setGenWarning(err.message || 'Back card generation is unavailable right now.')
+        }
+
+        sessionStorage.setItem('mockMember', JSON.stringify(mockMember))
+      } catch (err) {
+        console.warn('Mock card generation unavailable:', err)
+        setGenError(err.message || 'Card generation failed. Please try again.')
+      } finally {
+        setGenerating(false)
+      }
+    }
+
+    generate()
+  }, [member, mockCardUrl])
+
+  const formatTime = (s) => {
+    const mins = Math.floor(s / 60)
+    const secs = s % 60
+    return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`
+  }
 
   if (loading) {
     return (
@@ -106,15 +184,61 @@ export default function SuccessPage() {
               </div>
             </div>
 
+            {/* AI Card Generation Spinner */}
+            {generating && (
+              <div className="text-center py-10 bg-blue-50 border border-blue-200 rounded-2xl mb-8">
+                <div className="relative w-20 h-20 mx-auto mb-5">
+                  <div className="absolute inset-0 rounded-full border-4 border-blue-100" />
+                  <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-600 animate-spin" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <CreditCard className="w-8 h-8 text-blue-600" />
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">Generating Your Card</h3>
+                <p className="text-sm text-slate-500 mb-4 max-w-sm mx-auto">
+                  This usually takes 15–30 seconds.
+                </p>
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-blue-200 rounded-full shadow-sm">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                  <span className="text-sm font-medium text-blue-700">Processing — {formatTime(elapsed)}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Generation Error */}
+            {genError && !generating && (
+              <div className="text-center py-6 bg-red-50 border border-red-200 rounded-2xl mb-8">
+                <p className="text-sm font-medium text-red-800 mb-2">Card generation failed</p>
+                <p className="text-xs text-red-600 mb-4">{genError}</p>
+                <button
+                  onClick={() => {
+                    genStartedRef.current = false
+                    setGenError(null)
+                    // Re-trigger by updating member
+                    setMember({ ...member })
+                  }}
+                  className="px-5 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-all"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+
+            {genWarning && !generating && !genError && (
+              <div className="text-center py-4 bg-amber-50 border border-amber-200 rounded-2xl mb-8">
+                <p className="text-sm font-medium text-amber-800 mb-1">Partial card generation</p>
+                <p className="text-xs text-amber-700">{genWarning}</p>
+              </div>
+            )}
+
             {/* Card Preview & Download */}
-            {(member.hasCard || mockCardUrl) ? (
+            {!generating && !genError && (member.hasCard || mockCardUrl) && (
               <div className="space-y-4 mb-8">
                 <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                   <CreditCard className="w-5 h-5" />
                   Your Membership Card
                 </h3>
 
-                {/* Mock-generated cards (front + back) */}
                 {mockCardUrl ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -153,7 +277,6 @@ export default function SuccessPage() {
                     )}
                   </div>
                 ) : (
-                  /* Real backend cards (front + back) */
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Front</p>
@@ -190,7 +313,10 @@ export default function SuccessPage() {
                   </div>
                 )}
               </div>
-            ) : (
+            )}
+
+            {/* Waiting for backend card gen (non-mock) */}
+            {!generating && !genError && !mockCardUrl && !member.hasCard && !shouldUseMock() && (
               <div className="text-center py-8 bg-blue-50 border border-blue-200 rounded-xl mb-8">
                 <div className="animate-spin w-8 h-8 border-2 border-blue-300 border-t-blue-600 rounded-full mx-auto mb-3" />
                 <p className="text-sm font-medium text-blue-800">Generating your membership card...</p>

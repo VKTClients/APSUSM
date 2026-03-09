@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Shield, Menu, X } from 'lucide-react'
+import { Shield, Menu, X, Heart } from 'lucide-react'
 import { useTranslation } from '../contexts/TranslationContext'
 import LanguageToggle from './LanguageToggle'
 
@@ -38,6 +38,10 @@ export default function Navbar() {
           <Link to="/admin" className={`hover:text-slate-900 transition-colors ${isAdmin ? 'text-slate-900' : ''}`}>
             {t('nav_admin')}
           </Link>
+          <Link to="/donate" className={`hover:text-slate-900 transition-colors flex items-center gap-1 ${location.pathname === '/donate' ? 'text-slate-900' : ''}`}>
+            <Heart className="w-3.5 h-3.5" />
+            {t('nav_donate')}
+          </Link>
         </div>
 
         <div className="hidden md:flex items-center gap-3">
@@ -66,6 +70,7 @@ export default function Navbar() {
           <a href="/#how-it-works" className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-slate-600 active:bg-slate-50 transition-colors" onClick={() => setOpen(false)}>{t('nav_how_it_works')}</a>
           <Link to="/register" className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/register' ? 'bg-slate-100 text-slate-900' : 'text-slate-600 active:bg-slate-50'}`} onClick={() => setOpen(false)}>{t('nav_register')}</Link>
           <Link to="/admin" className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${isAdmin ? 'bg-slate-100 text-slate-900' : 'text-slate-600 active:bg-slate-50'}`} onClick={() => setOpen(false)}>{t('nav_admin')}</Link>
+          <Link to="/donate" className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/donate' ? 'bg-slate-100 text-slate-900' : 'text-slate-600 active:bg-slate-50'}`} onClick={() => setOpen(false)}><Heart className="w-4 h-4" /> {t('nav_donate')}</Link>
           <div className="pt-3 border-t border-slate-100 mt-2 flex items-center justify-between">
             <LanguageToggle />
             {import.meta.env.DEV && window.location.hostname === 'localhost' && (

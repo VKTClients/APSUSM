@@ -1,15 +1,22 @@
 """
-APSUSM Card Generator — Flask API
-==================================
-POST /api/generate-card  →  returns PNG membership card
+APSUSM Card Generator Flask API.
+
+Workflow:
+  1. POST /api/generate-card-ai → OpenAI image generation + Pillow photo paste
+  2. POST /api/generate-card-back → Pillow-rendered back card PNG
+  3. GET  /api/health → service health check
 """
 
+import io
 import os
-import shutil
 import uuid
+from dotenv import load_dotenv
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
-from renderer import render_card, render_back_card, generate_member_id
+from renderer_v2 import render_back_card, generate_member_id
+from card_generator_gpt import generate_front_card_ai, PHOTO_X, PHOTO_Y, PHOTO_W, PHOTO_H
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
@@ -20,15 +27,16 @@ CORS(app)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_PATH = os.environ.get(
     "CARD_TEMPLATE",
-    os.path.join(BASE_DIR, "templates", "ID_Template.png"),
+    os.path.join(BASE_DIR, "templates", "CardFront.png"),
 )
-_BACK_DEFAULT = os.path.join(BASE_DIR, "templates", "ID_Template_Back.png")
-# Auto-copy from frontend folder if not already in templates/
-if not os.path.isfile(_BACK_DEFAULT):
-    _BACK_SRC = os.path.join(BASE_DIR, "..", "apsusm-frontend", "ID_Template_Back.png")
-    if os.path.isfile(_BACK_SRC):
-        shutil.copy2(_BACK_SRC, _BACK_DEFAULT)
-BACK_TEMPLATE_PATH = os.environ.get("CARD_TEMPLATE_BACK", _BACK_DEFAULT)
+CARD_EXAMPLE_PATH = os.environ.get(
+    "CARD_EXAMPLE",
+    os.path.join(BASE_DIR, "templates", "CardExample.png"),
+)
+BACK_TEMPLATE_PATH = os.environ.get(
+    "CARD_TEMPLATE_BACK",
+    os.path.join(BASE_DIR, "templates", "CardBack.png"),
+)
 OUTPUT_DIR = os.path.join(BASE_DIR, "output")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -45,20 +53,28 @@ def _allowed(filename: str) -> bool:
 # ---------------------------------------------------------------------------
 
 
+@app.route("/api/generate-card-ai", methods=["POST"])
 @app.route("/api/generate-card", methods=["POST"])
-def generate_card():
+def generate_card_ai():
     """
+    Front card generation:
+      - OpenAI generates the full card design (background, name, member ID)
+      - Pillow pastes the REAL uploaded photo on top
+
     Accept multipart form-data:
-      - full_name  (text, required)
-      - photo      (file, required, JPEG/PNG/WebP, ≤10 MB)
-      - member_id  (text, optional)
-      - save       (text, optional, "true" to persist to disk)
+      - full_name   (text, required)
+      - photo       (file, required, JPEG/PNG/WebP, <=10 MB)
+      - member_id   (text, optional — auto-generated if omitted)
+      - email       (text, optional)
+      - save        (text, optional, "true" to persist to disk)
 
     Returns the generated PNG directly (Content-Type: image/png).
-    If ?save=true, also saves to /output/ and returns JSON with the path.
     """
-    # --- Validate inputs ---
     full_name = request.form.get("full_name", "").strip()
+    if not full_name:
+        first_name = request.form.get("first_name", "").strip()
+        last_name = request.form.get("last_name", "").strip()
+        full_name = " ".join(part for part in (first_name, last_name) if part).strip()
     if not full_name:
         return jsonify({"error": "full_name is required"}), 400
 
@@ -73,29 +89,40 @@ def generate_card():
     if len(photo_bytes) > MAX_PHOTO_SIZE:
         return jsonify({"error": f"Photo exceeds {MAX_PHOTO_SIZE // (1024*1024)} MB limit"}), 400
 
-    if not os.path.isfile(TEMPLATE_PATH):
-        return jsonify({"error": f"Template not found at {TEMPLATE_PATH}"}), 500
-
     member_id = request.form.get("member_id", "").strip() or None
+    user_id = request.form.get("user_id", "").strip()
+    photo_mode = request.form.get("photo_mode", "original").strip().lower()
+    if photo_mode not in ("original", "enhanced"):
+        photo_mode = "original"
     save_to_disk = request.form.get("save", "").lower() == "true"
 
     # Auto-generate member ID if not provided
     if not member_id:
-        first_name = request.form.get("first_name", "").strip()
-        last_name = request.form.get("last_name", "").strip()
-        license_number = request.form.get("license_number", "").strip()
         email = request.form.get("email", "").strip()
-        member_id = generate_member_id(first_name, last_name, license_number, email)
+        parts = full_name.split(None, 1)
+        member_id = generate_member_id(
+            first_name=parts[0] if parts else full_name,
+            last_name=parts[1] if len(parts) > 1 else "",
+            email=email,
+        )
 
-    # --- Generate card ---
     try:
-        png_bytes = render_card(TEMPLATE_PATH, photo_bytes, full_name, member_id)
+        png_bytes = generate_front_card_ai(
+            photo_bytes=photo_bytes,
+            full_name=full_name,
+            member_id=member_id,
+            user_id=user_id,
+            template_path=TEMPLATE_PATH,
+            example_path=CARD_EXAMPLE_PATH,
+            photo_mode=photo_mode,
+        )
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 500
     except Exception as e:
         return jsonify({"error": f"Card generation failed: {str(e)}"}), 500
 
-    # --- Optionally save ---
     if save_to_disk:
-        filename = f"card_{uuid.uuid4().hex[:12]}.png"
+        filename = f"card_ai_{uuid.uuid4().hex[:12]}.png"
         out_path = os.path.join(OUTPUT_DIR, filename)
         with open(out_path, "wb") as f:
             f.write(png_bytes)
@@ -104,10 +131,10 @@ def generate_card():
             "filename": filename,
             "path": out_path,
             "size_bytes": len(png_bytes),
+            "full_name": full_name,
+            "member_id": member_id,
         })
 
-    # --- Return PNG directly ---
-    import io
     return send_file(
         io.BytesIO(png_bytes),
         mimetype="image/png",
@@ -150,9 +177,8 @@ def generate_card_back():
             "size_bytes": len(png_bytes),
         })
 
-    import io as _io
     return send_file(
-        _io.BytesIO(png_bytes),
+        io.BytesIO(png_bytes),
         mimetype="image/png",
         as_attachment=False,
         download_name="card_back.png",
@@ -163,10 +189,16 @@ def generate_card_back():
 def health():
     return jsonify({
         "status": "ok",
+        "mode": "openai-image+pillow-photo-paste",
         "template_exists": os.path.isfile(TEMPLATE_PATH),
-        "template_path": TEMPLATE_PATH,
+        "example_exists": os.path.isfile(CARD_EXAMPLE_PATH),
         "back_template_exists": os.path.isfile(BACK_TEMPLATE_PATH),
-        "back_template_path": BACK_TEMPLATE_PATH,
+        "openai_key_set": bool(os.environ.get("OPENAI_API_KEY")),
+        "photo_coordinates": {
+            "x": PHOTO_X, "y": PHOTO_Y,
+            "width": PHOTO_W, "height": PHOTO_H,
+            "note": "Pillow pastes real photo at these coords on the 1536x1024 card",
+        },
     })
 
 
@@ -175,8 +207,9 @@ def health():
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5500))
-    print(f"Card Generator API running on http://localhost:{port}")
-    print(f"Template: {TEMPLATE_PATH}")
-    print(f"Back template: {BACK_TEMPLATE_PATH}")
-    print(f"Output dir: {OUTPUT_DIR}")
+    print(f"Card Generator API (OpenAI image + Pillow photo paste)")
+    print(f"  Running on http://localhost:{port}")
+    print(f"  Template: {TEMPLATE_PATH}")
+    print(f"  Example:  {CARD_EXAMPLE_PATH}")
+    print(f"  Photo coords: x={PHOTO_X}, y={PHOTO_Y}, {PHOTO_W}x{PHOTO_H}")
     app.run(host="0.0.0.0", port=port, debug=True)

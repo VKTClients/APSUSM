@@ -49,11 +49,19 @@ public class MemberService {
      */
     @Transactional
     public Member registerMember(RegistrationRequest request, MultipartFile photo) throws Exception {
+        String resolvedLicenseNumber = request.getLicenseNumber() != null
+                ? request.getLicenseNumber().trim()
+                : "";
+        if (resolvedLicenseNumber.isBlank()) {
+            resolvedLicenseNumber = request.getEmail();
+            request.setLicenseNumber(resolvedLicenseNumber);
+        }
+
         // Validate uniqueness
         if (memberRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email is already registered");
         }
-        if (memberRepository.existsByLicenseNumber(request.getLicenseNumber())) {
+        if (memberRepository.existsByLicenseNumber(resolvedLicenseNumber)) {
             throw new IllegalArgumentException("License number is already registered");
         }
 
@@ -66,15 +74,22 @@ public class MemberService {
         member.setLastName(request.getLastName());
         member.setEmail(request.getEmail());
         member.setPhone(request.getPhone());
-        member.setLicenseNumber(request.getLicenseNumber());
+        member.setLicenseNumber(resolvedLicenseNumber);
         member.setInstitution(request.getInstitution());
         member.setSpecialization(request.getSpecialization());
         member.setProvince(request.getProvince());
         member.setPhotoPath(photoPath);
-        member.setStatus(MemberStatus.PENDING_PAYMENT);
+        member.setMemberId(memberIdGenerator.generateMemberId());
+        member.setStatus(MemberStatus.PAID);
+        member.setPaidAt(LocalDateTime.now());
+        member.setExpiresAt(LocalDateTime.now().plusYears(1));
 
         member = memberRepository.save(member);
-        log.info("Member registered: {} (ID: {})", member.getEmail(), member.getId());
+        log.info("Member registered without payment: {} (ID: {}, Member ID: {})", member.getEmail(), member.getId(), member.getMemberId());
+
+        generateAndSendCard(member);
+
+        member = memberRepository.findById(member.getId()).orElse(member);
 
         return member;
     }

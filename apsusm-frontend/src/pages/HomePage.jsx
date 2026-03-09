@@ -332,6 +332,7 @@ export default function HomePage() {
           </p>
           <div className="flex items-center gap-5 text-xs text-slate-400">
             <Link to="/register" className="hover:text-slate-700 transition-colors">{t('nav_register')}</Link>
+            <Link to="/donate" className="hover:text-slate-700 transition-colors">{t('nav_donate')}</Link>
             <Link to="/admin" className="hover:text-slate-700 transition-colors">{t('nav_admin')}</Link>
           </div>
         </div>

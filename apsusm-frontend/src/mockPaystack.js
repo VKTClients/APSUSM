@@ -1,6 +1,8 @@
 // Mock Paystack for development when backend isn't available
 
 const CARD_GENERATOR_URL = 'http://localhost:5500'
+const CARD_GENERATOR_UNAVAILABLE_MESSAGE =
+  'Card generator service is not running on http://localhost:5500. Start the Flask card generator to render mock cards.'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -25,6 +27,10 @@ function _getMockMember() {
   return stored ? JSON.parse(stored) : null
 }
 
+export function isMockReference(reference) {
+  return typeof reference === 'string' && reference.startsWith('MOCK_')
+}
+
 const _PT_MONTHS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
 
 function _formatDatePT(date) {
@@ -47,6 +53,7 @@ export async function mockRegisterMember(formData) {
   const position = formData.get('position') || ''
   const province = formData.get('province') || ''
   const photoFile = formData.get('photo')
+  const photoMode = formData.get('photoMode') || 'original'
 
   // Convert photo to base64 for sessionStorage persistence
   let photoBase64 = null
@@ -68,10 +75,12 @@ export async function mockRegisterMember(formData) {
     position,
     province,
     photoBase64,
-    status: 'PENDING_PAYMENT',
+    photoMode,
+    status: 'ACTIVE',
     hasCard: false,
     emailSent: false,
     registeredAt: new Date().toISOString(),
+    paidAt: new Date().toISOString(),
     expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
   }
 
@@ -84,7 +93,7 @@ export async function mockRegisterMember(formData) {
     success: true,
     message: 'Registration successful',
     memberId: mockId,   // <-- RegisterPage reads result.memberId
-    status: 'PENDING_PAYMENT',
+    status: 'ACTIVE',
   }
 }
 
@@ -115,12 +124,8 @@ export function mockPaystackPayment(memberId) {
 // Mock Payment Verification — triggers card generation
 // ---------------------------------------------------------------------------
 export async function mockVerifyPayment(reference) {
-  const storedRef = sessionStorage.getItem('mockPaymentRef')
-  if (!storedRef || !reference.startsWith('MOCK_')) {
+  if (!isMockReference(reference)) {
     return null // not a mock reference, let real API handle it
-  }
-  if (storedRef !== reference) {
-    return { success: false, message: 'Invalid reference' }
   }
 
   const member = _getMockMember()
@@ -128,31 +133,19 @@ export async function mockVerifyPayment(reference) {
     return { success: false, message: 'No registration data found' }
   }
 
+  const storedRef = sessionStorage.getItem('mockPaymentRef')
+  const expectedReference = member.paymentReference || storedRef
+  if (expectedReference && expectedReference !== reference) {
+    return { success: false, message: 'Invalid reference' }
+  }
+
   // Update member status to ACTIVE
   member.status = 'ACTIVE'
   member.paidAt = new Date().toISOString()
 
-  // Try to generate front + back cards via card-generator API
-  let cardUrl = null
-  let cardBackUrl = null
-  if (member.photoBase64) {
-    try {
-      cardUrl = await _generateCardViaAPI(member)
-      member.hasCard = true
-      member.cardGeneratedAt = new Date().toISOString()
-      member.cardUrl = cardUrl
-    } catch (err) {
-      console.warn('Front card generation failed (is card-generator running on :5500?):', err)
-      member.hasCard = false
-    }
-    try {
-      cardBackUrl = await _generateBackCardViaAPI(member)
-      member.cardBackUrl = cardBackUrl
-    } catch (err) {
-      console.warn('Back card generation failed:', err)
-    }
-  }
-
+  // Card generation is now handled by SuccessPage so the user
+  // sees a proper loading spinner while the AI works.
+  member.hasCard = false
   member.emailSent = true
   sessionStorage.setItem('mockMember', JSON.stringify(member))
   sessionStorage.removeItem('mockPaymentRef')
@@ -174,10 +167,25 @@ export async function mockVerifyPayment(reference) {
   }
 }
 
+async function _fetchCardGenerator(path, options = {}) {
+  let response
+  try {
+    response = await fetch(`${CARD_GENERATOR_URL}${path}`, options)
+  } catch {
+    throw new Error(CARD_GENERATOR_UNAVAILABLE_MESSAGE)
+  }
+
+  if (!response.ok) {
+    throw new Error(`Card generator returned ${response.status}`)
+  }
+
+  return response
+}
+
 // ---------------------------------------------------------------------------
 // Call the Python card generator API
 // ---------------------------------------------------------------------------
-async function _generateCardViaAPI(member) {
+export async function generateCardViaAPI(member) {
   // Convert base64 data URL back to a Blob
   const res = await fetch(member.photoBase64)
   const blob = await res.blob()
@@ -186,16 +194,14 @@ async function _generateCardViaAPI(member) {
   formData.append('full_name', member.fullName)
   formData.append('photo', blob, 'photo.jpg')
   formData.append('member_id', member.memberId)
+  formData.append('user_id', member.id)
   formData.append('email', member.email || '')
+  formData.append('photo_mode', member.photoMode || 'original')
 
-  const response = await fetch(`${CARD_GENERATOR_URL}/api/generate-card`, {
+  const response = await _fetchCardGenerator('/api/generate-card-ai', {
     method: 'POST',
     body: formData,
   })
-
-  if (!response.ok) {
-    throw new Error(`Card generator returned ${response.status}`)
-  }
 
   const cardBlob = await response.blob()
   const cardUrl = URL.createObjectURL(cardBlob)
@@ -205,7 +211,7 @@ async function _generateCardViaAPI(member) {
   return cardUrl
 }
 
-async function _generateBackCardViaAPI(member) {
+export async function generateBackCardViaAPI(member) {
   const membroDesde = _formatDatePT(member.registeredAt || new Date())
   const validoAte = _formatDatePT(member.expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000))
 
@@ -213,14 +219,10 @@ async function _generateBackCardViaAPI(member) {
   formData.append('membro_desde_date', membroDesde)
   formData.append('valido_ate_date', validoAte)
 
-  const response = await fetch(`${CARD_GENERATOR_URL}/api/generate-card-back`, {
+  const response = await _fetchCardGenerator('/api/generate-card-back', {
     method: 'POST',
     body: formData,
   })
-
-  if (!response.ok) {
-    throw new Error(`Back card generator returned ${response.status}`)
-  }
 
   const cardBlob = await response.blob()
   const cardBackUrl = URL.createObjectURL(cardBlob)

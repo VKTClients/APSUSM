@@ -2,6 +2,7 @@ import axios from 'axios';
 import {
   shouldUseMock, mockRegisterMember, mockPaystackPayment,
   mockVerifyPayment, mockGetMemberStatus, mockVerifyMember,
+  isMockReference,
   getMockCardUrl as _getMockCardUrl,
   getMockCardBackUrl as _getMockCardBackUrl,
 } from './mockPaystack';
@@ -45,7 +46,7 @@ export async function initializePayment(memberId) {
 
 // Verify Payment (after Paystack redirect)
 export async function verifyPayment(reference) {
-  if (shouldUseMock()) {
+  if (shouldUseMock() && isMockReference(reference)) {
     const mockResult = await mockVerifyPayment(reference);
     if (mockResult) return mockResult;
   }
@@ -53,9 +54,11 @@ export async function verifyPayment(reference) {
     const response = await api.get(`/payment/verify/${reference}`);
     return response.data;
   } catch (error) {
-    console.warn('Backend not available, falling back to mock:', error);
-    const mockResult = await mockVerifyPayment(reference);
-    if (mockResult) return mockResult;
+    if (shouldUseMock() && isMockReference(reference)) {
+      const mockResult = await mockVerifyPayment(reference);
+      if (mockResult) return mockResult;
+    }
+    console.warn('Payment verification failed:', error);
     throw error;
   }
 }
