@@ -7,8 +7,10 @@ import {
   getMockCardBackUrl as _getMockCardBackUrl,
 } from './mockPaystack';
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Accept': 'application/json',
   },
@@ -97,7 +99,7 @@ export { _getMockCardBackUrl as getMockCardBackUrl };
 
 // Admin API (requires Basic Auth)
 const adminApi = axios.create({
-  baseURL: '/api/admin',
+  baseURL: `${API_BASE_URL}/admin`,
   headers: {
     'Accept': 'application/json',
   },
@@ -129,11 +131,11 @@ export async function regenerateCard(id) {
 }
 
 export function getCardFrontUrl(id) {
-  return `/api/members/card/${id}/front`;
+  return `${API_BASE_URL}/members/card/${id}/front`;
 }
 
 export function getCardBackUrl(id) {
-  return `/api/members/card/${id}/back`;
+  return `${API_BASE_URL}/members/card/${id}/back`;
 }
 
 export default api;

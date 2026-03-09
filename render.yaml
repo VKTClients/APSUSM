@@ -1,0 +1,77 @@
+databases:
+  - name: apsusm-postgres
+    databaseName: apsusm
+    user: apsusm
+
+services:
+  - type: web
+    name: apsusm-backend
+    runtime: java
+    rootDir: apsusm-backend
+    plan: starter
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -Dserver.port=$PORT -jar target/apsusm-membership-1.0.0.jar
+    envVars:
+      - key: JAVA_VERSION
+        value: 17
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: apsusm-postgres
+          property: connectionString
+      - key: SPRING_DATASOURCE_DRIVERCLASSNAME
+        value: org.postgresql.Driver
+      - key: SPRING_JPA_DATABASE_PLATFORM
+        value: org.hibernate.dialect.PostgreSQLDialect
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update
+      - key: SPRING_H2_CONSOLE_ENABLED
+        value: "false"
+      - key: APP_CORS_ALLOWED_ORIGINS
+        value: https://apsusm-frontend.onrender.com
+      - key: APP_CARD_GENERATOR_URL
+        value: https://apsusm-card-generator.onrender.com
+      - key: PAYSTACK_CALLBACK_URL
+        value: https://apsusm-frontend.onrender.com/payment/verify
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_PUBLIC_KEY
+        sync: false
+      - key: PAYSTACK_WEBHOOK_SECRET
+        sync: false
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+
+  - type: web
+    name: apsusm-card-generator
+    runtime: python
+    rootDir: card-generator
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 180
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: OPENAI_API_KEY
+        sync: false
+
+  - type: static
+    name: apsusm-frontend
+    runtime: static
+    rootDir: apsusm-frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://apsusm-backend.onrender.com/api

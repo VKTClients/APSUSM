@@ -5,6 +5,7 @@ Werkzeug==3.0.3
 Flask-CORS==4.0.1
 openai==1.54.0
 python-dotenv==1.0.1
+gunicorn==23.0.0
 
 # Development dependencies (optional for Vercel)
 pytest==8.3.3
