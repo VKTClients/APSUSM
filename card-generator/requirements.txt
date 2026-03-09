@@ -1,6 +1,13 @@
+# Core dependencies for APSUSM Card Generator
 Pillow==10.4.0
 Flask==3.0.3
+Werkzeug==3.0.3
 Flask-CORS==4.0.1
-openai>=1.0.0
-python-dotenv>=1.0.0
+openai==1.54.0
+python-dotenv==1.0.1
+
+# Development dependencies (optional for Vercel)
 pytest==8.3.3
+
+# Vercel serverless compatibility
+# Note: Vercel automatically includes some packages, but we pin critical ones
