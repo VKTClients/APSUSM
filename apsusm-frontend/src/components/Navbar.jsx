@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Shield, Menu, X, Heart } from 'lucide-react'
+import { Menu, X, Heart } from 'lucide-react'
 import { useTranslation } from '../contexts/TranslationContext'
 import LanguageToggle from './LanguageToggle'
 
@@ -15,9 +15,11 @@ export default function Navbar() {
     <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/50">
       <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-8 h-8 bg-gradient-to-br from-brand-blue to-brand-purple rounded-lg flex items-center justify-center">
-            <Shield className="w-5 h-5 text-white" />
-          </div>
+          <img
+            src="/brand/Logo.png"
+            alt="APSUSM logo"
+            className="h-11 w-auto object-contain"
+          />
           <div className="flex flex-col">
             <span className="text-lg font-semibold tracking-tight text-slate-900 leading-none">
               AP<span className="text-brand-red">+</span>SUSM

@@ -1,9 +1,15 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import {
-  ArrowDownRight, ArrowRight, Shield,
-  Mail, Stethoscope, BadgeCheck,
-  Heart, Handshake, Megaphone, Award, FileCheck
+  ArrowRight,
+  Shield,
+  Mail,
+  BadgeCheck,
+  Heart,
+  Handshake,
+  Megaphone,
+  Award,
+  FileCheck,
 } from 'lucide-react'
 import { useTranslation } from '../contexts/TranslationContext'
 
@@ -45,162 +51,169 @@ const steps = [
 
 export default function HomePage() {
   const { t } = useTranslation()
-  return (
-    <div className="bg-[#f2f0eb] min-h-screen font-sans">
-      {/* HERO */}
-      <section className="min-h-[80vh] md:min-h-screen pt-20 flex items-center">
-        <div className="max-w-7xl mx-auto px-6 w-full">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[calc(80vh-5rem)] md:min-h-[calc(100vh-5rem)] py-8 md:py-16">
 
-            <div className="flex flex-col justify-center">
-              <div className="flex items-center gap-3 mb-6 md:mb-10">
-                <div className="w-6 h-px bg-slate-400" />
+  return (
+    <div className="min-h-screen bg-[#f2f0eb] font-sans">
+      <section className="relative flex min-h-[80vh] items-center overflow-hidden pt-20 md:min-h-screen">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(237,28,36,0.12),_transparent_26%),radial-gradient(circle_at_top_right,_rgba(46,99,188,0.14),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(255,206,0,0.16),_transparent_22%),linear-gradient(135deg,_rgba(38,153,70,0.08),_rgba(242,240,235,0))]" />
+        <div className="max-w-7xl mx-auto w-full px-6">
+          <div className="grid min-h-[calc(80vh-5rem)] items-center gap-8 py-8 md:min-h-[calc(100vh-5rem)] md:py-16 lg:grid-cols-2 lg:gap-12">
+            <div className="relative z-10 flex flex-col justify-center">
+              <div className="mb-6 flex items-center gap-3 md:mb-10">
+                <div className="h-px w-6 bg-slate-400" />
                 <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-5 h-5 rounded-full border border-slate-400 flex items-center justify-center">
-                    <ArrowRight className="w-3 h-3" />
+                  <div className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-400">
+                    <ArrowRight className="h-3 w-3" />
                   </div>
                   {t('hero_tag')}{' '}
                   <span className="font-semibold text-slate-900">{t('hero_tag_suffix')}</span>
                 </div>
               </div>
 
-              <h1 className="text-[clamp(2.25rem,7vw,5.5rem)] font-bold text-slate-900 leading-[0.92] tracking-tight mb-6 md:mb-8">
-                APSUSM<br />
+              <h1 className="mb-6 text-[clamp(2.25rem,7vw,5.5rem)] font-bold leading-[0.92] tracking-tight text-slate-900 md:mb-8">
+                APSUSM
+                <br />
                 {t('hero_title').split(' ').map((word, i) => (
                   <React.Fragment key={i}>
-                    {word}<br />
+                    {word}
+                    <br />
                   </React.Fragment>
                 ))}
               </h1>
 
-              <p className="text-slate-500 text-base md:text-lg font-light leading-relaxed max-w-md mb-6 md:mb-10">
+              <p className="mb-6 max-w-md text-base font-light leading-relaxed text-slate-500 md:mb-10 md:text-lg">
                 {t('hero_subtitle')}
               </p>
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+              <div className="mb-6 inline-flex w-fit items-center gap-3 rounded-2xl border border-white/70 bg-white/75 px-4 py-3 shadow-lg shadow-slate-900/5 backdrop-blur-sm md:mb-10">
+                <img
+                  src="/brand/Logo.png"
+                  alt="APSUSM"
+                  className="h-10 w-10 object-contain"
+                />
+                <div>
+                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500">APSUSM</p>
+                  <p className="text-sm text-slate-700">
+                    Unified membership for health professionals in Mozambique
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4">
                 <Link
                   to="/register"
-                  className="bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium py-4 px-8 rounded-full transition-all shadow-lg shadow-slate-900/20 flex items-center gap-2"
+                  className="flex items-center gap-2 rounded-full bg-slate-900 px-8 py-4 text-sm font-medium text-white shadow-lg shadow-slate-900/20 transition-all hover:bg-slate-800"
                 >
                   {t('hero_cta_primary')}
                 </Link>
                 <a
                   href="#how-it-works"
-                  className="flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors group"
+                  className="group flex items-center gap-2 text-sm font-medium text-slate-700 transition-colors hover:text-slate-900"
                 >
-                  <div className="w-8 h-8 rounded-full border border-slate-400 flex items-center justify-center group-hover:border-slate-700 transition-colors">
-                    <ArrowRight className="w-3.5 h-3.5" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-400 transition-colors group-hover:border-slate-700">
+                    <ArrowRight className="h-3.5 w-3.5" />
                   </div>
                   {t('hero_cta_secondary')}
                 </a>
               </div>
             </div>
 
-            <div className="flex lg:hidden justify-center mt-4 mb-2">
-              <div className="w-full max-w-xs bg-slate-900 text-white rounded-2xl p-5 shadow-2xl">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-7 h-7 rounded-full bg-brand-red/90 flex items-center justify-center">
-                    <Shield className="w-3.5 h-3.5 text-white" />
-                  </div>
-                  <span className="text-xs text-slate-400 font-mono tracking-widest">APSUSM</span>
-                </div>
-                <p className="text-xs text-slate-400 mb-1">Member ID</p>
-                <p className="font-mono font-semibold text-base tracking-widest text-white mb-3">APSUSM-2025-0042</p>
-                <div className="border-t border-slate-700 pt-3">
-                  <p className="text-sm font-medium text-white">Dr. Ana Machava</p>
-                  <p className="text-xs text-slate-400 mt-0.5">Internal Medicine · Maputo</p>
-                </div>
+            <div className="relative z-10 flex justify-center lg:hidden">
+              <div className="w-full max-w-sm rounded-[2rem] border border-white/70 bg-white/80 p-3 shadow-2xl shadow-slate-900/10 backdrop-blur-sm">
+                <img
+                  src="/brand/HomepageExample.png"
+                  alt="APSUSM membership card example"
+                  className="w-full rounded-[1.5rem] object-cover"
+                />
               </div>
             </div>
 
-            <div className="relative hidden lg:flex items-center justify-center h-[520px]">
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-200/60 to-transparent rounded-3xl" />
+            <div className="relative z-10 hidden h-[560px] items-center justify-center lg:flex">
+              <div className="absolute inset-0 rounded-[2rem] border border-white/60 bg-white/50 shadow-2xl shadow-slate-900/5 backdrop-blur-sm" />
+              <div className="absolute inset-x-10 top-0 h-2 rounded-full bg-gradient-to-r from-brand-red via-brand-yellow to-brand-blue" />
 
-              <div className="absolute top-8 right-4 w-72 bg-slate-900 text-white rounded-2xl p-6 shadow-2xl">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="w-8 h-8 rounded-full bg-brand-red/90 flex items-center justify-center">
-                    <Shield className="w-4 h-4 text-white" />
+              <div className="relative flex h-full w-full items-center justify-center px-10">
+                <div className="absolute left-2 top-16 w-48 rounded-[1.75rem] border border-white/70 bg-white/90 p-5 shadow-xl">
+                  <div className="mb-3 flex items-center gap-3">
+                    <img
+                      src="/brand/Logo.png"
+                      alt="APSUSM logo"
+                      className="h-10 w-10 object-contain"
+                    />
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Verified</p>
+                      <p className="text-sm font-semibold text-slate-900">Member card</p>
+                    </div>
                   </div>
-                  <span className="text-xs text-slate-400 font-mono tracking-widest">APSUSM</span>
+                  <p className="text-sm leading-relaxed text-slate-600">
+                    Real APSUSM-issued digital card for identification and verification.
+                  </p>
                 </div>
-                <p className="text-xs text-slate-400 mb-1">Member ID</p>
-                <p className="font-mono font-semibold text-lg tracking-widest text-white mb-4">APSUSM-2025-0042</p>
-                <div className="border-t border-slate-700 pt-4">
-                  <p className="text-sm font-medium text-white">Dr. Ana Machava</p>
-                  <p className="text-xs text-slate-400 mt-0.5">Internal Medicine · Maputo</p>
+
+                <div className="w-full max-w-2xl rounded-[2rem] border border-white/70 bg-white p-4 shadow-[0_28px_80px_rgba(15,23,42,0.18)]">
+                  <img
+                    src="/brand/HomepageExample.png"
+                    alt="APSUSM membership card example"
+                    className="w-full rounded-[1.5rem] object-cover"
+                  />
                 </div>
-              </div>
 
-              <div className="absolute top-6 right-[calc(18rem-1.5rem)] w-14 h-14 bg-brand-red rounded-full flex items-center justify-center shadow-xl z-10">
-                <ArrowDownRight className="w-6 h-6 text-white" />
-              </div>
-
-              <div className="absolute bottom-24 left-0 w-56 bg-white rounded-2xl p-5 shadow-xl border border-slate-100">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-                    <Shield className="w-4 h-4 text-slate-700" />
-                  </div>
-                  <span className="text-sm font-semibold text-slate-800">Member Verified</span>
+                <div className="absolute bottom-12 right-4 w-56 rounded-[1.75rem] bg-[#c8c2b4] p-5 shadow-xl">
+                  <p className="text-4xl font-bold leading-none text-slate-900">11</p>
+                  <p className="mt-2 text-sm leading-snug text-slate-700">
+                    Provinces connected through one membership system
+                  </p>
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed">Use the issued member ID to verify membership status online.</p>
-                <div className="mt-3 flex gap-1">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className={`h-1 flex-1 rounded-full ${i === 0 ? 'bg-green-500' : 'bg-slate-200'}`} />
-                  ))}
+
+                <div className="absolute right-10 top-14 flex h-16 w-16 items-center justify-center rounded-full bg-brand-red text-white shadow-xl">
+                  <Shield className="h-6 w-6" />
                 </div>
-              </div>
-
-              <div className="absolute top-1/2 left-8 -translate-y-1/2 w-40 bg-[#c8c2b4] rounded-2xl p-5 shadow-lg">
-                <p className="text-4xl font-bold text-slate-900 leading-none">5k+</p>
-                <p className="text-xs text-slate-600 mt-2 leading-snug">Verified health professionals</p>
-              </div>
-
-              <div className="absolute bottom-8 right-12 w-14 h-14 bg-white rounded-2xl shadow-lg border border-slate-100 flex items-center justify-center">
-                <Stethoscope className="w-7 h-7 text-brand-blue" />
-              </div>
-
-              <div className="absolute bottom-20 left-32 w-16 h-16 rounded-full border-2 border-slate-400/40 flex items-center justify-center">
-                <div className="w-8 h-8 rounded-full border-2 border-slate-400/40" />
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="border-t border-b border-slate-300/50 bg-white/40 backdrop-blur-sm">
+      <section className="border-y border-slate-300/50 bg-white/40 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map(s => (
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+            {stats.map((s) => (
               <div key={s.label} className="text-center">
-                <p className="text-3xl font-bold text-slate-900 tracking-tight">{s.value}</p>
-                <p className="text-sm text-slate-500 mt-1">{t(s.label)}</p>
+                <p className="text-3xl font-bold tracking-tight text-slate-900">{s.value}</p>
+                <p className="mt-1 text-sm text-slate-500">{t(s.label)}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-12 md:py-24 px-4 md:px-6">
+      <section className="px-4 py-12 md:px-6 md:py-24">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 md:mb-14">
-            <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">{t('features_title')}</p>
-            <h2 className="text-2xl md:text-4xl font-bold text-slate-900 tracking-tight max-w-lg">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">
+              {t('features_title')}
+            </p>
+            <h2 className="max-w-lg text-2xl font-bold tracking-tight text-slate-900 md:text-4xl">
               {t('features_subtitle')}
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             {features.map((f, i) => (
               <div
                 key={f.titleKey}
-                className={`rounded-2xl p-6 ${i % 2 === 0 ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200'}`}
+                className={`rounded-2xl p-6 ${
+                  i % 2 === 0 ? 'bg-slate-900 text-white' : 'border border-slate-200 bg-white'
+                }`}
               >
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-5 ${
-                  i % 2 === 0 ? 'bg-white/10' : 'bg-slate-100'
-                }`}>
-                  <f.icon className={`w-5 h-5 ${i % 2 === 0 ? 'text-white' : 'text-slate-700'}`} />
+                <div
+                  className={`mb-5 flex h-10 w-10 items-center justify-center rounded-xl ${
+                    i % 2 === 0 ? 'bg-white/10' : 'bg-slate-100'
+                  }`}
+                >
+                  <f.icon className={`h-5 w-5 ${i % 2 === 0 ? 'text-white' : 'text-slate-700'}`} />
                 </div>
-                <h3 className={`font-semibold text-base mb-2 ${i % 2 === 0 ? 'text-white' : 'text-slate-900'}`}>
+                <h3 className={`mb-2 text-base font-semibold ${i % 2 === 0 ? 'text-white' : 'text-slate-900'}`}>
                   {t(f.titleKey)}
                 </h3>
                 <p className={`text-sm leading-relaxed ${i % 2 === 0 ? 'text-slate-400' : 'text-slate-500'}`}>
@@ -212,35 +225,55 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-12 md:py-24 px-4 md:px-6 bg-white/50">
+      <section className="bg-white/50 px-4 py-12 md:px-6 md:py-24">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+          <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">{t('mission_label')}</p>
-              <h2 className="text-2xl md:text-4xl font-bold text-slate-900 tracking-tight mb-6">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">
+                {t('mission_label')}
+              </p>
+              <h2 className="mb-6 text-2xl font-bold tracking-tight text-slate-900 md:text-4xl">
                 {t('mission_title')}
               </h2>
-              <p className="text-slate-500 leading-relaxed mb-6">
-                {t('mission_body')}
-              </p>
-              <p className="text-slate-600 font-medium text-sm leading-relaxed border-l-4 border-brand-blue pl-4">
+              <p className="mb-6 leading-relaxed text-slate-500">{t('mission_body')}</p>
+              <p className="border-l-4 border-brand-blue pl-4 text-sm font-medium leading-relaxed text-slate-600">
                 {t('mission_closing')}
               </p>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-5">
+            <div className="grid gap-5 sm:grid-cols-2">
               {[
-                { icon: Megaphone, titleKey: 'pillar_advocacy_title', descKey: 'pillar_advocacy_desc', color: 'bg-red-50 text-red-600' },
-                { icon: Award, titleKey: 'pillar_appreciation_title', descKey: 'pillar_appreciation_desc', color: 'bg-blue-50 text-blue-600' },
-                { icon: Handshake, titleKey: 'pillar_representation_title', descKey: 'pillar_representation_desc', color: 'bg-emerald-50 text-emerald-600' },
-                { icon: Heart, titleKey: 'pillar_solidarity_title', descKey: 'pillar_solidarity_desc', color: 'bg-purple-50 text-purple-600' },
+                {
+                  icon: Megaphone,
+                  titleKey: 'pillar_advocacy_title',
+                  descKey: 'pillar_advocacy_desc',
+                  color: 'bg-red-50 text-red-600',
+                },
+                {
+                  icon: Award,
+                  titleKey: 'pillar_appreciation_title',
+                  descKey: 'pillar_appreciation_desc',
+                  color: 'bg-blue-50 text-blue-600',
+                },
+                {
+                  icon: Handshake,
+                  titleKey: 'pillar_representation_title',
+                  descKey: 'pillar_representation_desc',
+                  color: 'bg-emerald-50 text-emerald-600',
+                },
+                {
+                  icon: Heart,
+                  titleKey: 'pillar_solidarity_title',
+                  descKey: 'pillar_solidarity_desc',
+                  color: 'bg-purple-50 text-purple-600',
+                },
               ].map((p) => (
-                <div key={p.titleKey} className="bg-[#f2f0eb] rounded-2xl p-6 border border-slate-200/60">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${p.color}`}>
-                    <p.icon className="w-5 h-5" />
+                <div key={p.titleKey} className="rounded-2xl border border-slate-200/60 bg-[#f2f0eb] p-6">
+                  <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-xl ${p.color}`}>
+                    <p.icon className="h-5 w-5" />
                   </div>
-                  <h3 className="font-semibold text-slate-900 mb-2">{t(p.titleKey)}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">{t(p.descKey)}</p>
+                  <h3 className="mb-2 font-semibold text-slate-900">{t(p.titleKey)}</h3>
+                  <p className="text-sm leading-relaxed text-slate-500">{t(p.descKey)}</p>
                 </div>
               ))}
             </div>
@@ -248,46 +281,50 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="how-it-works" className="py-12 md:py-24 px-4 md:px-6 bg-white/50">
+      <section id="how-it-works" className="bg-white/50 px-4 py-12 md:px-6 md:py-24">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 md:mb-14">
-            <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">{t('process_title')}</p>
-            <h2 className="text-2xl md:text-4xl font-bold text-slate-900 tracking-tight">{t('process_subtitle')}</h2>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">
+              {t('process_title')}
+            </p>
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 md:text-4xl">
+              {t('process_subtitle')}
+            </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid gap-6 md:grid-cols-3">
             {steps.map((s, i) => (
-              <div key={s.num} className="relative bg-[#f2f0eb] rounded-2xl p-8 border border-slate-200/60">
+              <div key={s.num} className="relative rounded-2xl border border-slate-200/60 bg-[#f2f0eb] p-8">
                 {i < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-10 -right-3 z-10">
-                    <ArrowRight className="w-5 h-5 text-slate-400" />
+                  <div className="absolute -right-3 top-10 z-10 hidden md:block">
+                    <ArrowRight className="h-5 w-5 text-slate-400" />
                   </div>
                 )}
-                <span className="block text-5xl font-bold text-slate-200 mb-6 leading-none">{s.num}</span>
-                <h3 className="text-lg font-semibold text-slate-900 mb-3">{t(s.titleKey)}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{t(s.descKey)}</p>
+                <span className="mb-6 block text-5xl font-bold leading-none text-slate-200">{s.num}</span>
+                <h3 className="mb-3 text-lg font-semibold text-slate-900">{t(s.titleKey)}</h3>
+                <p className="text-sm leading-relaxed text-slate-500">{t(s.descKey)}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-12 md:py-20 px-4 md:px-6">
+      <section className="px-4 py-12 md:px-6 md:py-20">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-slate-900 rounded-2xl md:rounded-3xl px-6 md:px-10 py-10 md:py-14 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
+          <div className="flex flex-col items-center justify-between gap-6 rounded-2xl bg-slate-900 px-6 py-10 md:flex-row md:gap-8 md:rounded-3xl md:px-10 md:py-14">
             <div>
-              <p className="text-xs uppercase tracking-widest text-slate-400 mb-3">{t('cta_title')}</p>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight max-w-lg text-center md:text-left">
+              <p className="mb-3 text-xs uppercase tracking-widest text-slate-400">{t('cta_title')}</p>
+              <h2 className="max-w-lg text-center text-2xl font-bold tracking-tight text-white md:text-left md:text-4xl">
                 {t('cta_subtitle')}
               </h2>
             </div>
-            <div className="flex flex-col items-center gap-4 shrink-0">
+            <div className="flex shrink-0 flex-col items-center gap-4">
               <Link
                 to="/register"
-                className="bg-white hover:bg-slate-100 text-slate-900 font-semibold text-sm py-4 px-8 rounded-full transition-all whitespace-nowrap flex items-center gap-2 shadow-lg"
+                className="flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-8 py-4 text-sm font-semibold text-slate-900 shadow-lg transition-all hover:bg-slate-100"
               >
                 {t('cta_button')}
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="h-4 w-4" />
               </Link>
               <p className="text-xs text-slate-500">{t('cta_note')}</p>
             </div>
@@ -295,23 +332,31 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="border-t border-slate-300/50 py-8 md:py-10 px-4 md:px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <footer className="border-t border-slate-300/50 px-4 py-8 md:px-6 md:py-10">
+        <div className="max-w-7xl mx-auto flex flex-col items-center justify-between gap-4 md:flex-row">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 bg-gradient-to-br from-brand-blue to-brand-purple rounded-md flex items-center justify-center">
-              <Shield className="w-4 h-4 text-white" />
-            </div>
+            <img
+              src="/brand/Logo.png"
+              alt="APSUSM logo"
+              className="h-9 w-auto object-contain"
+            />
             <span className="text-sm font-semibold text-slate-800">
               AP<span className="text-brand-red">+</span>SUSM
             </span>
           </div>
-          <p className="text-xs text-slate-400 text-center">
+          <p className="text-center text-xs text-slate-400">
             © {new Date().getFullYear()} {t('footer_copyright')}
           </p>
           <div className="flex items-center gap-5 text-xs text-slate-400">
-            <Link to="/register" className="hover:text-slate-700 transition-colors">{t('nav_register')}</Link>
-            <Link to="/donate" className="hover:text-slate-700 transition-colors">{t('nav_donate')}</Link>
-            <Link to="/admin" className="hover:text-slate-700 transition-colors">{t('nav_admin')}</Link>
+            <Link to="/register" className="transition-colors hover:text-slate-700">
+              {t('nav_register')}
+            </Link>
+            <Link to="/donate" className="transition-colors hover:text-slate-700">
+              {t('nav_donate')}
+            </Link>
+            <Link to="/admin" className="transition-colors hover:text-slate-700">
+              {t('nav_admin')}
+            </Link>
           </div>
         </div>
       </footer>
