@@ -49,6 +49,17 @@ const steps = [
   { num: '03', titleKey: 'process_3_title', descKey: 'process_3_desc' },
 ]
 
+const collaborationImages = [
+  {
+    src: 'https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    alt: 'Health professionals shaking hands in collaboration',
+  },
+  {
+    src: 'https://images.pexels.com/photos/1170979/pexels-photo-1170979.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    alt: 'Healthcare worker consulting a patient',
+  },
+]
+
 export default function HomePage() {
   const { t } = useTranslation()
 
@@ -239,6 +250,37 @@ export default function HomePage() {
               <p className="border-l-4 border-brand-blue pl-4 text-sm font-medium leading-relaxed text-slate-600">
                 {t('mission_closing')}
               </p>
+
+              <div className="mt-8 grid gap-4 sm:grid-cols-[1.2fr_0.8fr]">
+                <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white shadow-xl shadow-slate-900/5">
+                  <img
+                    src={collaborationImages[0].src}
+                    alt={collaborationImages[0].alt}
+                    className="h-64 w-full object-cover"
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+                <div className="flex flex-col gap-4">
+                  <div className="overflow-hidden rounded-[1.5rem] border border-white/70 bg-white shadow-lg shadow-slate-900/5">
+                    <img
+                      src={collaborationImages[1].src}
+                      alt={collaborationImages[1].alt}
+                      className="h-36 w-full object-cover"
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  <div className="rounded-[1.5rem] bg-gradient-to-br from-brand-red/95 via-brand-yellow/85 to-brand-blue p-[1px] shadow-lg shadow-slate-900/10">
+                    <div className="rounded-[calc(1.5rem-1px)] bg-white/90 px-5 py-4 backdrop-blur-sm">
+                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Solidarity</p>
+                      <p className="mt-2 text-sm leading-relaxed text-slate-700">
+                        Community, advocacy, and collaboration for professionals serving Mozambique.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2">
