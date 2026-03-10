@@ -198,7 +198,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="px-4 py-12 md:px-6 md:py-24">
+      <section className="px-4 py-12 md:px-6 md:py-24 apsusm-section-glow">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 md:mb-14">
             <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">
@@ -236,7 +236,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-white/50 px-4 py-12 md:px-6 md:py-24">
+      <section className="bg-white/50 px-4 py-12 md:px-6 md:py-24 apsusm-section-glow">
         <div className="max-w-7xl mx-auto">
           <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
             <div>
@@ -292,7 +292,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="px-4 pb-12 md:px-6 md:pb-24">
+      <section className="px-4 pb-12 md:px-6 md:pb-24 apsusm-section-glow">
         <div className="max-w-7xl mx-auto">
           <div className="rounded-[2rem] apsusm-gradient-panel p-[1px] shadow-2xl shadow-slate-900/10">
             <div className="rounded-[calc(2rem-1px)] apsusm-soft-surface p-4 md:p-6">
@@ -309,7 +309,7 @@ export default function HomePage() {
               </div>
 
               <div className="grid gap-4 lg:grid-cols-[1.2fr_1.2fr_0.9fr]">
-                <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white shadow-xl shadow-slate-900/5">
+                <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white shadow-xl shadow-slate-900/10">
                   <img
                     src={collaborationImages[0].src}
                     alt={collaborationImages[0].alt}
@@ -318,7 +318,7 @@ export default function HomePage() {
                     referrerPolicy="no-referrer"
                   />
                 </div>
-                <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white shadow-xl shadow-slate-900/5">
+                <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white shadow-xl shadow-slate-900/10">
                   <img
                     src={collaborationImages[1].src}
                     alt={collaborationImages[1].alt}
@@ -346,7 +346,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="how-it-works" className="bg-white/50 px-4 py-12 md:px-6 md:py-24">
+      <section id="how-it-works" className="bg-white/50 px-4 py-12 md:px-6 md:py-24 apsusm-section-glow">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 md:mb-14">
             <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">
