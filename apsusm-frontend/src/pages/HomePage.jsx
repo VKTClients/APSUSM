@@ -185,7 +185,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="border-y border-slate-300/50 bg-white/40 backdrop-blur-sm">
+      <section className="border-y border-slate-300/50 apsusm-soft-surface backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             {stats.map((s) => (
@@ -214,7 +214,7 @@ export default function HomePage() {
               <div
                 key={f.titleKey}
                 className={`rounded-2xl p-6 ${
-                  i % 2 === 0 ? 'bg-slate-900 text-white' : 'border border-slate-200 bg-white'
+                  i % 2 === 0 ? 'bg-slate-900 text-white' : 'border border-slate-200 apsusm-soft-surface'
                 }`}
               >
                 <div
@@ -251,32 +251,45 @@ export default function HomePage() {
                 {t('mission_closing')}
               </p>
 
-              <div className="mt-8 grid gap-4 sm:grid-cols-[1.2fr_0.8fr]">
-                <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white shadow-xl shadow-slate-900/5">
-                  <img
-                    src={collaborationImages[0].src}
-                    alt={collaborationImages[0].alt}
-                    className="h-64 w-full object-cover"
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                <div className="flex flex-col gap-4">
-                  <div className="overflow-hidden rounded-[1.5rem] border border-white/70 bg-white shadow-lg shadow-slate-900/5">
-                    <img
-                      src={collaborationImages[1].src}
-                      alt={collaborationImages[1].alt}
-                      className="h-36 w-full object-cover"
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
-                    />
+              <div className="mt-8 rounded-[2rem] apsusm-gradient-panel p-[1px] shadow-2xl shadow-slate-900/10">
+                <div className="rounded-[calc(2rem-1px)] apsusm-soft-surface p-4 md:p-5">
+                  <div className="mb-5 flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500">In practice</p>
+                      <p className="mt-2 text-lg font-semibold text-slate-900">Solidarity and collaboration across the profession</p>
+                    </div>
+                    <div className="hidden md:flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-lg">
+                      <Handshake className="h-5 w-5" />
+                    </div>
                   </div>
-                  <div className="rounded-[1.5rem] bg-gradient-to-br from-brand-red/95 via-brand-yellow/85 to-brand-blue p-[1px] shadow-lg shadow-slate-900/10">
-                    <div className="rounded-[calc(1.5rem-1px)] bg-white/90 px-5 py-4 backdrop-blur-sm">
-                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Solidarity</p>
-                      <p className="mt-2 text-sm leading-relaxed text-slate-700">
-                        Community, advocacy, and collaboration for professionals serving Mozambique.
-                      </p>
+                  <div className="grid gap-4 md:grid-cols-[1.35fr_0.95fr]">
+                    <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white shadow-xl shadow-slate-900/5">
+                      <img
+                        src={collaborationImages[0].src}
+                        alt={collaborationImages[0].alt}
+                        className="h-80 w-full object-cover md:h-[27rem]"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-4">
+                      <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white shadow-lg shadow-slate-900/5">
+                        <img
+                          src={collaborationImages[1].src}
+                          alt={collaborationImages[1].alt}
+                          className="h-44 w-full object-cover md:h-56"
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+                      <div className="rounded-[1.5rem] apsusm-gradient-panel p-[1px] shadow-lg shadow-slate-900/10">
+                        <div className="rounded-[calc(1.5rem-1px)] bg-white/90 px-5 py-4 backdrop-blur-sm">
+                          <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Solidarity</p>
+                          <p className="mt-2 text-sm leading-relaxed text-slate-700">
+                            Community, advocacy, and collaboration for professionals serving Mozambique.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -310,7 +323,7 @@ export default function HomePage() {
                   color: 'bg-purple-50 text-purple-600',
                 },
               ].map((p) => (
-                <div key={p.titleKey} className="rounded-2xl border border-slate-200/60 bg-[#f2f0eb] p-6">
+                <div key={p.titleKey} className="rounded-2xl border border-slate-200/60 apsusm-soft-surface p-6">
                   <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-xl ${p.color}`}>
                     <p.icon className="h-5 w-5" />
                   </div>
@@ -336,7 +349,7 @@ export default function HomePage() {
 
           <div className="grid gap-6 md:grid-cols-3">
             {steps.map((s, i) => (
-              <div key={s.num} className="relative rounded-2xl border border-slate-200/60 bg-[#f2f0eb] p-8">
+              <div key={s.num} className="relative rounded-2xl border border-slate-200/60 apsusm-soft-surface p-8">
                 {i < steps.length - 1 && (
                   <div className="absolute -right-3 top-10 z-10 hidden md:block">
                     <ArrowRight className="h-5 w-5 text-slate-400" />

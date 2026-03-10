@@ -19,6 +19,22 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior-y: none;
   overflow-x: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(237, 28, 36, 0.07), transparent 24%),
+    radial-gradient(circle at top right, rgba(46, 99, 188, 0.07), transparent 28%),
+    linear-gradient(180deg, #f6f3ee 0%, #f2f0eb 100%);
+}
+
+.apsusm-gradient-panel {
+  background:
+    linear-gradient(135deg, rgba(237, 28, 36, 0.92), rgba(255, 206, 0, 0.88) 42%, rgba(46, 99, 188, 0.92));
+}
+
+.apsusm-soft-surface {
+  background:
+    radial-gradient(circle at top left, rgba(237, 28, 36, 0.08), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(46, 99, 188, 0.08), transparent 28%),
+    rgba(255, 255, 255, 0.72);
 }
 
 ::-webkit-scrollbar { width: 6px; }
