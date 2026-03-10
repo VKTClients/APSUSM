@@ -19,7 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 
 @Service
 public class CardGenerationService {
@@ -164,6 +163,6 @@ public class CardGenerationService {
 
     private String formatBackDate(LocalDateTime dateTime) {
         LocalDateTime value = dateTime != null ? dateTime : LocalDateTime.now();
-        return value.format(DateTimeFormatter.ofPattern("dd MMM yyyy", new Locale("pt", "MZ")));
+        return value.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 }

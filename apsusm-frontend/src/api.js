@@ -20,6 +20,31 @@ function getApiError(error, fallbackMessage) {
   return error?.response?.data?.message || error?.message || fallbackMessage;
 }
 
+function normalizeRegistrationError(message) {
+  const text = (message || '').toLowerCase();
+
+  if (text.includes('email is already registered')) {
+    return 'Email already used. Please use a different email address.';
+  }
+  if (text.includes('license number is already registered')) {
+    return 'This ID is already used. Please check your details.';
+  }
+  if (text.includes('photo file is required')) {
+    return 'Please upload a photo before submitting.';
+  }
+  if (text.includes('only jpeg and png images are allowed')) {
+    return 'Only JPEG and PNG images are allowed.';
+  }
+  if (text.includes('file size must be under 5mb')) {
+    return 'Photo must be smaller than 5MB.';
+  }
+  if (text.includes('member photo not found')) {
+    return 'Photo upload failed. Please try again.';
+  }
+
+  return message;
+}
+
 // Member Registration
 export async function registerMember(formData) {
   if (shouldUseMock()) {
@@ -35,7 +60,11 @@ export async function registerMember(formData) {
       console.warn('Backend not available, falling back to mock:', error);
       return mockRegisterMember(formData);
     }
-    throw new Error(getApiError(error, 'Registration failed. Backend is unavailable.'));
+    throw new Error(
+      normalizeRegistrationError(
+        getApiError(error, 'Registration failed. Backend is unavailable.')
+      )
+    );
   }
 }
 
