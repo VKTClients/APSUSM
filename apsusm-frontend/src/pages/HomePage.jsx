@@ -130,30 +130,12 @@ export default function HomePage() {
             </div>
 
             <div className="relative z-10 flex justify-center lg:hidden">
-              <div className="w-full max-w-sm space-y-4">
-                <div className="rounded-[2rem] border border-white/70 bg-white/80 p-3 shadow-2xl shadow-slate-900/10 backdrop-blur-sm">
-                  <img
-                    src="/brand/HomepageExample.png"
-                    alt="APSUSM membership card example"
-                    className="w-full rounded-[1.5rem] object-cover"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  {collaborationImages.map((image) => (
-                    <div
-                      key={image.alt}
-                      className="overflow-hidden rounded-[1.5rem] border border-white/70 bg-white shadow-lg shadow-slate-900/10"
-                    >
-                      <img
-                        src={image.src}
-                        alt={image.alt}
-                        className="h-32 w-full object-cover"
-                        loading="lazy"
-                        referrerPolicy="no-referrer"
-                      />
-                    </div>
-                  ))}
-                </div>
+              <div className="w-full max-w-sm rounded-[2rem] border border-white/70 bg-white/80 p-3 shadow-2xl shadow-slate-900/10 backdrop-blur-sm">
+                <img
+                  src="/brand/HomepageExample.png"
+                  alt="APSUSM membership card example"
+                  className="w-full rounded-[1.5rem] object-cover"
+                />
               </div>
             </div>
 
@@ -187,31 +169,11 @@ export default function HomePage() {
                   />
                 </div>
 
-                <div className="absolute -left-4 bottom-10 w-44 overflow-hidden rounded-[1.75rem] border border-white/80 bg-white p-2 shadow-xl shadow-slate-900/10">
-                  <img
-                    src={collaborationImages[0].src}
-                    alt={collaborationImages[0].alt}
-                    className="h-48 w-full rounded-[1.25rem] object-cover"
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-
                 <div className="absolute bottom-12 right-4 w-56 rounded-[1.75rem] bg-[#c8c2b4] p-5 shadow-xl">
                   <p className="text-4xl font-bold leading-none text-slate-900">11</p>
                   <p className="mt-2 text-sm leading-snug text-slate-700">
                     Provinces connected through one membership system
                   </p>
-                </div>
-
-                <div className="absolute right-2 top-36 w-40 overflow-hidden rounded-[1.5rem] border border-white/80 bg-white p-2 shadow-xl shadow-slate-900/10">
-                  <img
-                    src={collaborationImages[1].src}
-                    alt={collaborationImages[1].alt}
-                    className="h-36 w-full rounded-[1.125rem] object-cover"
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                  />
                 </div>
 
                 <div className="absolute right-10 top-14 flex h-16 w-16 items-center justify-center rounded-full bg-brand-red text-white shadow-xl">
